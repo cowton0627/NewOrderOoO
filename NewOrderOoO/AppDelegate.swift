@@ -6,16 +6,40 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseFirestoreSwift
+import FirebaseCoreDiagnostics
+import UserNotifications
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
-
+    var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        FirebaseApp.configure()
+        
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { agree, error in
+            if agree {
+                print("允許接收通知")
+            } else {
+                print("不允許接收通知")
+            }
+        }
+        
+        UNUserNotificationCenter.current().delegate = self
+        
         return true
     }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        
+        completionHandler([.badge, .sound, .alert])
+    }
+    
+    
+    
+    
 
     // MARK: UISceneSession Lifecycle
 
