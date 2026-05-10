@@ -39,8 +39,8 @@ class MenuDetailTableViewController: UITableViewController {
     private let heroCountUnit = UILabel()
     private let heroStepper = UIStepper()
 
-    // 對應 storyboard 上 7 個 static cells 的高度（row 0 用 hero card 取代，所以設 0）
-    private let staticHeights: [CGFloat] = [0, 77, 77, 66, 77, 77, 44]
+    // 對應 storyboard 上 7 個 static cells 的高度（row 0 用 hero card 取代,row 6 是 storyboard 預留的空白 cell,都設 0 隱藏）
+    private let staticHeights: [CGFloat] = [0, 77, 77, 66, 77, 77, 0]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,7 +65,7 @@ class MenuDetailTableViewController: UITableViewController {
         heroCard.layer.cornerCurve = .continuous
 
         heroThumb.translatesAutoresizingMaskIntoConstraints = false
-        heroThumb.contentMode = .scaleAspectFit
+        heroThumb.contentMode = .scaleAspectFill
         heroThumb.backgroundColor = AppTheme.imagePlaceholder
         heroThumb.clipsToBounds = true
         heroCard.addSubview(heroThumb)
