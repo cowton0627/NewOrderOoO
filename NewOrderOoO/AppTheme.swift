@@ -57,9 +57,9 @@ enum AppTheme {
     enum Shadow {
         static func card(on layer: CALayer) {
             layer.shadowColor = UIColor.black.cgColor
-            layer.shadowOpacity = 0.06
-            layer.shadowRadius = 10
-            layer.shadowOffset = CGSize(width: 0, height: 4)
+            layer.shadowOpacity = 0.09
+            layer.shadowRadius = 12
+            layer.shadowOffset = CGSize(width: 0, height: 5)
         }
         static func button(on layer: CALayer) {
             layer.shadowColor = UIColor.black.cgColor
@@ -67,5 +67,29 @@ enum AppTheme {
             layer.shadowRadius = 14
             layer.shadowOffset = CGSize(width: 0, height: 6)
         }
+    }
+}
+
+/// 文字外加 padding 的 UILabel，用於膠囊狀標籤（如價格）。
+final class PaddedLabel: UILabel {
+    var contentInsets = UIEdgeInsets(top: 4, left: 10, bottom: 4, right: 10)
+
+    override var intrinsicContentSize: CGSize {
+        let s = super.intrinsicContentSize
+        return CGSize(
+            width: s.width + contentInsets.left + contentInsets.right,
+            height: s.height + contentInsets.top + contentInsets.bottom
+        )
+    }
+
+    override func drawText(in rect: CGRect) {
+        super.drawText(in: rect.inset(by: contentInsets))
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layer.cornerRadius = bounds.height / 2
+        layer.cornerCurve = .continuous
+        layer.masksToBounds = true
     }
 }

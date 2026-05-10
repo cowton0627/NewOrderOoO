@@ -18,7 +18,7 @@ class MenuTableViewCell: UITableViewCell {
     private let card = UIView()
     private let thumb = UIImageView()
     private let nameLabel = UILabel()
-    private let priceLabel = UILabel()
+    private let priceLabel = PaddedLabel()
     private let contentLabel = UILabel()
     private let descriptionLabel = UILabel()
 
@@ -54,7 +54,8 @@ class MenuTableViewCell: UITableViewCell {
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
         priceLabel.font = AppTheme.Font.priceMedium
         priceLabel.textColor = AppTheme.accent
-        priceLabel.textAlignment = .right
+        priceLabel.textAlignment = .center
+        priceLabel.backgroundColor = AppTheme.accent.withAlphaComponent(0.15)
         priceLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         priceLabel.setContentHuggingPriority(.required, for: .horizontal)
         card.addSubview(priceLabel)
@@ -151,6 +152,20 @@ class MenuTableViewController: UITableViewController {
         tableView.backgroundColor = AppTheme.pageBackground
         tableView.rowHeight = 116
         tableView.contentInset = UIEdgeInsets(top: 4, left: 0, bottom: 16, right: 0)
+
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .always
+
+        let refresh = UIRefreshControl()
+        refresh.tintColor = AppTheme.accent
+        refresh.addTarget(self, action: #selector(refreshPulled), for: .valueChanged)
+        tableView.refreshControl = refresh
+    }
+
+    @objc private func refreshPulled() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { [weak self] in
+            self?.tableView.refreshControl?.endRefreshing()
+        }
     }
 
     @IBSegueAction func dataPassed(_ coder: NSCoder) -> MenuDetailTableViewController? {
