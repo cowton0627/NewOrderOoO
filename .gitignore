@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+
+# Xcode user-specific state (應該每人不同,不該進 repo)
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+
+# Xcode build / index 衍生物
+build/
+DerivedData/
+*.dSYM
+*.dSYM.zip
+
+# Swift Package Manager local artifacts
+.swiftpm/
+.build/
+
+# 注意:**不要** ignore Package.resolved。
+# app 專案要把 lockfile commit 進去確保所有人裝同版套件。
+
+# CocoaPods (這個專案沒用,但加上以防萬一)
+Pods/
+
+# Bundler / fastlane
+.bundle/
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# IDE
+.idea/
+.vscode/
+
+# Local build / log
+*.log
+*.bak
+*.tmp
