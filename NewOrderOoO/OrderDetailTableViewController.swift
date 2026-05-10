@@ -128,14 +128,11 @@ class OrderDetailTableViewController: UITableViewController {
     @IBOutlet weak var animeImgView: UIImageView!  // storyboard 仍會 instantiate 此 view,但實際 banner 用 bannerImageView 取代
 
     private let bannerImageView = UIImageView()
-
-    var orderRepository: OrderRepository = FirestoreOrderRepository()
+    private let viewModel = OrderListViewModel()
 
     struct cellKey {
         static let OrderDetailTableViewCell = "OrderDetailTableViewCell"
     }
-
-    var orderDatas = [OrderData]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -206,9 +203,8 @@ class OrderDetailTableViewController: UITableViewController {
         Task { [weak self] in
             guard let self = self else { return }
             do {
-                let orders = try await self.orderRepository.fetchOrders()
+                try await self.viewModel.load()
                 await MainActor.run {
-                    self.orderDatas = orders
                     self.tableView.reloadData()
                 }
             } catch {
@@ -217,20 +213,15 @@ class OrderDetailTableViewController: UITableViewController {
         }
     }
 
-    private func avatarImage(for indexPath: IndexPath) -> UIImage? {
-        // 用 row 取得穩定 avatar，避免滾動時頭像變來變去
-        let id = (indexPath.row % 8) + 1
-        return UIImage(named: String(format: "00%d", id))
-    }
-
     //以下設定tableviewcell
     override func numberOfSections(in tableView: UITableView) -> Int { 1 }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { orderDatas.count }
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { viewModel.numberOfOrders }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: cellKey.OrderDetailTableViewCell, for: indexPath) as? OrderDetailTableViewCell else { return UITableViewCell() }
-        cell.configure(with: orderDatas[indexPath.row], avatarImage: avatarImage(for: indexPath))
+        let avatar = UIImage(named: viewModel.avatarAssetName(for: indexPath.row))
+        cell.configure(with: viewModel.order(at: indexPath.row), avatarImage: avatar)
         return cell
     }
 
@@ -238,18 +229,16 @@ class OrderDetailTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
 
         let deleteAction = UIContextualAction(style: .destructive, title: "刪除") { [weak self] (_, _, completionHandler) in
-            guard let self = self,
-                  let id = self.orderDatas[indexPath.row].id else {
+            guard let self = self else {
                 completionHandler(false)
                 return
             }
-            self.orderDatas.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
             completionHandler(true)
 
             Task {
                 do {
-                    try await self.orderRepository.deleteOrder(id: id)
+                    try await self.viewModel.delete(at: indexPath.row)
                 } catch {
                     print("deleteOrder failed: \(error)")
                 }

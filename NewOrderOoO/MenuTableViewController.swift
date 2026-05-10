@@ -121,7 +121,7 @@ class MenuTableViewCell: UITableViewCell {
 }
 
 class MenuTableViewController: UITableViewController {
-    let contents: [ProductData] = ProductCatalog.all
+    private let viewModel = MenuListViewModel()
 
     struct cellKey {
         static let MenuTableViewCell = "MenuTableViewCell"
@@ -155,25 +155,19 @@ class MenuTableViewController: UITableViewController {
 
     @IBSegueAction func dataPassed(_ coder: NSCoder) -> MenuDetailTableViewController? {
         guard let row = tableView.indexPathForSelectedRow?.row else { return nil }
-//        let productData = cellContents[row]
-//        return MenuDetailTableViewController(coder, productData: productData, bd)
-
         let controller = MenuDetailTableViewController(coder: coder)
-        controller?.productData = contents[row]
+        controller?.viewModel = MenuDetailViewModel(product: viewModel.product(at: row))
         return controller
     }
-
-
 
     //以下設定tableviewcell
     override func numberOfSections(in tableView: UITableView) -> Int { 1 }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { contents.count }
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { viewModel.numberOfProducts }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: cellKey.MenuTableViewCell, for: indexPath) as? MenuTableViewCell else { return UITableViewCell() }
-        cell.configure(with: contents[indexPath.row])
+        cell.configure(with: viewModel.product(at: indexPath.row))
         return cell
     }
-
 }

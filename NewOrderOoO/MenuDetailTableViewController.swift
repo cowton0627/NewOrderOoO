@@ -22,8 +22,10 @@ class MenuDetailTableViewController: UITableViewController {
     @IBOutlet weak var orderIceSegCon: UISegmentedControl!
     @IBOutlet weak var orderAddSegCon: UISegmentedControl!
 
-    var orderRepository: OrderRepository = FirestoreOrderRepository()
-    var productData: ProductData!
+    var viewModel: MenuDetailViewModel!
+
+    /// 給 storyboard segue 反向相容用,等價於 viewModel.product。
+    var productData: ProductData { viewModel.product }
 
     // MARK: - Hero card (取代 storyboard row 0)
     private let heroCard = UIView()
@@ -194,22 +196,15 @@ class MenuDetailTableViewController: UITableViewController {
     }
 
     private func refreshHero(stepperValue: Double) {
-        heroThumb.image = UIImage(named: productData.imgName)
-        heroName.text = productData.name
-        heroContent.text = productData.content
-        heroDescription.text = productData.description
+        let product = viewModel.product
+        heroThumb.image = UIImage(named: product.imgName)
+        heroName.text = product.name
+        heroContent.text = product.content
+        heroDescription.text = product.description
 
-        let moneySub = productData.price.dropFirst()
-        let moneyDouble = Double(String(moneySub)) ?? 0
-
-        let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "zh_tw")
-        formatter.numberStyle = .currencyISOCode
-        formatter.maximumFractionDigits = 0
-
-        let total = stepperValue == 0 ? moneyDouble : moneyDouble * (stepperValue + 1)
-        heroPrice.text = formatter.string(from: NSNumber(value: total))
-        heroCountValue.text = "\(Int(stepperValue + 1))"
+        let quantity = Int(stepperValue) + 1
+        heroPrice.text = viewModel.totalPriceText(quantity: quantity)
+        heroCountValue.text = "\(quantity)"
     }
 
     // MARK: - 表單樣式（姓名、大小、糖、冰、加料）
@@ -321,38 +316,26 @@ class MenuDetailTableViewController: UITableViewController {
     }
 
     @IBAction func orderSended(_ sender: UIButton) {
-        let name = orderNameTextField.text?.trimmingCharacters(in: .whitespaces) ?? ""
-        guard !name.isEmpty else {
-            presentInfoAlert(message: "姓名欄不得為空")
-            return
-        }
-        guard let unitPrice = Money.parse(productData.price) else {
-            presentInfoAlert(message: "價格格式錯誤")
-            return
-        }
-
-        let input = OrderInput(
-            orderName: name,
-            drinkName: productData.name,
-            size: DrinkSize.allCases[orderSizeSegCon.selectedSegmentIndex],
-            sugar: SugarLevel.allCases[orderSugarSegCon.selectedSegmentIndex],
-            ice: IceLevel.allCases[orderIceSegCon.selectedSegmentIndex],
-            add: AddOn.allCases[orderAddSegCon.selectedSegmentIndex],
-            unitPrice: unitPrice,
-            quantity: Int(heroStepper.value) + 1
-        )
+        let name = orderNameTextField.text ?? ""
+        let size = DrinkSize.allCases[orderSizeSegCon.selectedSegmentIndex]
+        let sugar = SugarLevel.allCases[orderSugarSegCon.selectedSegmentIndex]
+        let ice = IceLevel.allCases[orderIceSegCon.selectedSegmentIndex]
+        let add = AddOn.allCases[orderAddSegCon.selectedSegmentIndex]
+        let quantity = Int(heroStepper.value) + 1
 
         Task { [weak self] in
             guard let self = self else { return }
             do {
-                _ = try await self.orderRepository.placeOrder(input)
+                _ = try await self.viewModel.placeOrder(
+                    name: name, size: size, sugar: sugar, ice: ice, add: add, quantity: quantity
+                )
                 await MainActor.run {
                     self.scheduleSuccessNotification()
                     self.performSegue(withIdentifier: "orderSendedDB", sender: nil)
                 }
             } catch {
                 await MainActor.run {
-                    self.presentInfoAlert(message: "下單失敗:\(error.localizedDescription)")
+                    self.presentInfoAlert(message: error.localizedDescription)
                 }
             }
         }
