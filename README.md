@@ -132,26 +132,7 @@ firestore.rules                          # Firestore Security Rules
 
 ## Roadmap
 
-### 體驗
-- [ ] 購物車(一次下多杯不同規格)
-- [ ] 訂單狀態 lifecycle(待製作 / 製作中 / 完成)
-- [ ] Skeleton loading(目前是 spinner)
-- [ ] 自訂備註欄(去冰再加椰果...)
-
-### 功能
-- [ ] 推播:訂單完成可取餐
-- [ ] Apple Pay
-- [ ] 產品搜尋 / 分類
-- [ ] 產品資料動態化(從 Firestore 拿,目前寫死在 `ProductCatalog`)
-- [ ] 多語系
-- [ ] 帶身分的登入(Apple / Google),目前是 anonymous
-
-### 工程
-- [ ] 單元測試(`OrderRepository` 與 ViewModel 都已可測)
-- [ ] Crashlytics / Analytics
-- [ ] CI/CD
-- [ ] Dark Mode 全頁驗證
-- [ ] 加 `.gitignore`(目前沒設,`xcuserdata` 等容易被誤 track)
+長期規劃與未做事項移到 [`roadmap.md`](roadmap.md)。
 
 ## License
 
