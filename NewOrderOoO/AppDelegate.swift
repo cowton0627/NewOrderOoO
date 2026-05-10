@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseCore
+import FirebaseAuth
 import UserNotifications
 
 @main
@@ -16,7 +17,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         FirebaseApp.configure()
-        
+
+        // 匿名登入,讓 Firestore Security Rules 能 scope 到單一使用者
+        if Auth.auth().currentUser == nil {
+            Auth.auth().signInAnonymously { _, error in
+                if let error = error { print("anonymous sign-in failed: \(error)") }
+            }
+        }
+
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { agree, error in
             if agree {
                 print("允許接收通知")
@@ -24,9 +32,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 print("不允許接收通知")
             }
         }
-        
+
         UNUserNotificationCenter.current().delegate = self
-        
+
         return true
     }
     

@@ -17,6 +17,7 @@ struct OrderData: Codable, Identifiable {
     var cold: String
     var add: String
     var price: String
+    var uid: String?  // 文件擁有者,給 Firestore Security Rules 用
 }
 
 

@@ -1,0 +1,26 @@
+rules_version = '2';
+
+// 部署:firebase deploy --only firestore:rules (需先用 firebase init firestore 設好 project)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 訂單只能由建立者 (uid 等於目前登入者) 讀寫
+    match /orderList/{orderId} {
+      allow read: if request.auth != null
+                  && resource.data.uid == request.auth.uid;
+
+      // 建立訂單必須帶上自己的 uid,且必填欄位齊全
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.keys().hasAll(['orderName', 'drinkName', 'drinkSize', 'sugar', 'cold', 'add', 'price', 'uid']);
+
+      allow update: if request.auth != null
+                    && resource.data.uid == request.auth.uid
+                    && request.resource.data.uid == request.auth.uid;
+
+      allow delete: if request.auth != null
+                    && resource.data.uid == request.auth.uid;
+    }
+  }
+}
