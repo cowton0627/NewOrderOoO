@@ -65,7 +65,7 @@ class MenuDetailTableViewController: UITableViewController {
         heroCard.layer.cornerCurve = .continuous
 
         heroThumb.translatesAutoresizingMaskIntoConstraints = false
-        heroThumb.contentMode = .scaleAspectFill
+        heroThumb.contentMode = .scaleAspectFit
         heroThumb.backgroundColor = AppTheme.imagePlaceholder
         heroThumb.clipsToBounds = true
         heroCard.addSubview(heroThumb)
@@ -140,7 +140,7 @@ class MenuDetailTableViewController: UITableViewController {
             heroThumb.topAnchor.constraint(equalTo: heroCard.topAnchor),
             heroThumb.leadingAnchor.constraint(equalTo: heroCard.leadingAnchor),
             heroThumb.trailingAnchor.constraint(equalTo: heroCard.trailingAnchor),
-            heroThumb.heightAnchor.constraint(equalToConstant: 240),
+            heroThumb.heightAnchor.constraint(equalToConstant: 300),
 
             infoStack.topAnchor.constraint(equalTo: heroThumb.bottomAnchor, constant: 16),
             infoStack.leadingAnchor.constraint(equalTo: heroCard.leadingAnchor, constant: 16),
