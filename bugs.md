@@ -68,8 +68,16 @@
 ## Firestore 文件少一個 uid 欄位,加 Auth 後拿不到舊單
 
 - **症狀**:加 Anonymous Auth + per-user query 後,舊測試訂單看不到
-- **根因**:舊 Firestore 文件沒 `uid` 欄位(我們現在加了),`whereField("uid", isEqualTo: uid)` 自然查不到
-- **解(對 demo 而言)**:在 Firestore Console 手動清掉舊文件,或補 uid 欄位
+- **根因**:舊 Firestore 文件沒 `uid` 欄位(後來才加的),`whereField("uid", isEqualTo: uid)` 自然查不到
+- **解**:加 `migrateLegacyOrdersIfNeeded()`,進訂單頁時(VM.load 開頭)全 fetch 後對沒 uid 的文件 `updateData(["uid": currentUid])`,並用 UserDefaults flag 確保只跑一次
+- **連帶**:如果已 deploy security rules 把寫入限 owner-only,migration 會被擋。要先暫時放寬 rules 或在 console 手動補欄位
+
+## 「載入失敗:尚未登入,請稍後再試」
+
+- **症狀**:剛 launch 進訂單頁立刻跳這訊息,但不是每次都中
+- **根因**:`AppDelegate.signInAnonymously` 是 async callback,如果 user 太快進訂單頁,`Auth.auth().currentUser?.uid` 還是 nil,Repository `currentUid()` throw `notAuthenticated`
+- **解**:`currentUid()` 改 async,沒登入時自己 `await Auth.auth().signInAnonymously()` 主動觸發,等完成才回 uid
+- **連帶**:如果 Firebase Console 沒啟用 **Authentication > Sign-in method > Anonymous**,sign-in 會失敗 → 統一 throw `RepositoryError.signInFailed` 帶 user 友善的提示訊息
 
 ## SourceKit 一直跳「No such module 'UIKit'」
 
