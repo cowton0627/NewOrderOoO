@@ -10,11 +10,11 @@ import Foundation
 import FirebaseFirestore
 
 class MenuDetailTableViewController: UITableViewController {
+    // storyboard 上原本第 1 個 cell 的 outlet 仍保留（cell 高度設 0 隱藏），但實際 UI 改用下方 hero card。
     @IBOutlet weak var dtImgView: UIImageView!
     @IBOutlet weak var dtNameLabel: UILabel!
-    @IBOutlet weak var dtPriceLabel: UILabel!       //新增的貨幣金額
-    @IBOutlet weak var productCountLabel: UILabel!  //新增的訂購量, 訂購量不會在訂單結果顯示
-
+    @IBOutlet weak var dtPriceLabel: UILabel!
+    @IBOutlet weak var productCountLabel: UILabel!
     @IBOutlet weak var dtStepper: UIStepper!
 
     @IBOutlet weak var orderNameTextField: UITextField!
@@ -26,58 +26,198 @@ class MenuDetailTableViewController: UITableViewController {
     var db: Firestore!
     var productData: ProductData!
 
-    /*
-    storyboard產生的controller需定義coder: NSCoder,
-    其他地方產生如用super.init(nibName: nil, bundle: nil), 則不需coder參數
+    // MARK: - Hero card (取代 storyboard row 0)
+    private let heroCard = UIView()
+    private let heroThumb = UIImageView()
+    private let heroName = UILabel()
+    private let heroPrice = PaddedLabel()
+    private let heroContent = UILabel()
+    private let heroDescription = UILabel()
+    private let heroSeparator = UIView()
+    private let heroCountTitle = UILabel()
+    private let heroCountValue = UILabel()
+    private let heroCountUnit = UILabel()
+    private let heroStepper = UIStepper()
 
-     init?(_ coder: NSCoder, productData: ProductData, _ database: Firestore) {
-         self.productData = productData
-         self.db = database
-         super.init(coder: coder)
-     }
-
-     required init?(coder: NSCoder) {
-         fatalError("init(coder: ) has not been inplemented.")
-     }
-
-       使用init定義controller的這個傳值方法, 麻煩在於controller裡的變數都得定義,
-     於是乎, 在傳送頁竟要多宣告一個不會用到的 let bd: Firestore!
-     並在viewDidLoad裡 bd = Firestore.firestore()初始化
-    */
+    // 對應 storyboard 上 7 個 static cells 的高度（row 0 用 hero card 取代，所以設 0）
+    private let staticHeights: [CGFloat] = [0, 77, 77, 66, 77, 77, 44]
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.isScrollEnabled = false
+        tableView.isScrollEnabled = true
         tableView.separatorStyle = .none
         tableView.backgroundColor = AppTheme.pageBackground
+        tableView.alwaysBounceVertical = true
 
         applyStyle()
-
-        dtImgView.image = UIImage(named: productData.imgName)
-        dtNameLabel.text = productData.name
-        updatePriceLabel(priceData: productData.price, senderValue: dtStepper.value)
+        buildHeroHeader()
+        refreshHero(stepperValue: 0)
 
         db = Firestore.firestore()
     }
 
+    // MARK: - Hero card
+
+    private func buildHeroHeader() {
+        heroCard.translatesAutoresizingMaskIntoConstraints = false
+        heroCard.backgroundColor = AppTheme.cardBackground
+        heroCard.layer.cornerRadius = AppTheme.Radius.card
+        heroCard.layer.cornerCurve = .continuous
+
+        heroThumb.translatesAutoresizingMaskIntoConstraints = false
+        heroThumb.contentMode = .scaleAspectFill
+        heroThumb.backgroundColor = AppTheme.imagePlaceholder
+        heroThumb.clipsToBounds = true
+        heroCard.addSubview(heroThumb)
+
+        heroName.font = AppTheme.Font.detailTitle
+        heroName.textColor = AppTheme.primaryText
+        heroName.numberOfLines = 1
+        heroName.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        heroName.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        heroPrice.font = .monospacedDigitSystemFont(ofSize: 17, weight: .bold)
+        heroPrice.textColor = AppTheme.accent
+        heroPrice.backgroundColor = AppTheme.accent.withAlphaComponent(0.15)
+        heroPrice.textAlignment = .center
+        heroPrice.contentInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
+        heroPrice.setContentCompressionResistancePriority(.required, for: .horizontal)
+        heroPrice.setContentHuggingPriority(.required, for: .horizontal)
+
+        heroContent.font = .systemFont(ofSize: 14, weight: .medium)
+        heroContent.textColor = AppTheme.secondaryText
+        heroContent.numberOfLines = 1
+
+        heroDescription.font = AppTheme.Font.caption
+        heroDescription.textColor = AppTheme.tertiaryText
+        heroDescription.numberOfLines = 3
+
+        heroSeparator.translatesAutoresizingMaskIntoConstraints = false
+        heroSeparator.backgroundColor = UIColor.separator.withAlphaComponent(0.5)
+
+        heroCountTitle.font = AppTheme.Font.formLabel
+        heroCountTitle.textColor = AppTheme.primaryText
+        heroCountTitle.text = "數量"
+
+        heroCountValue.font = .monospacedDigitSystemFont(ofSize: 19, weight: .semibold)
+        heroCountValue.textColor = AppTheme.primaryText
+        heroCountValue.textAlignment = .right
+
+        heroCountUnit.font = AppTheme.Font.secondary
+        heroCountUnit.textColor = AppTheme.secondaryText
+        heroCountUnit.text = "杯"
+
+        heroStepper.tintColor = AppTheme.accent
+        heroStepper.maximumValue = 99
+        heroStepper.minimumValue = 0
+        heroStepper.value = 0
+        heroStepper.addTarget(self, action: #selector(heroStepperChanged(_:)), for: .valueChanged)
+
+        // 標題列：品名 + 價格膠囊
+        let titleRow = UIStackView(arrangedSubviews: [heroName, heroPrice])
+        titleRow.axis = .horizontal
+        titleRow.alignment = .firstBaseline
+        titleRow.spacing = 8
+
+        // 數量列：標題 + 杯數 + 杯 + Stepper
+        let countSpacer = UIView()
+        countSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        let countRow = UIStackView(arrangedSubviews: [heroCountTitle, countSpacer, heroCountValue, heroCountUnit, heroStepper])
+        countRow.axis = .horizontal
+        countRow.alignment = .center
+        countRow.spacing = 6
+
+        // 整體垂直 stack
+        let infoStack = UIStackView(arrangedSubviews: [titleRow, heroContent, heroDescription, heroSeparator, countRow])
+        infoStack.axis = .vertical
+        infoStack.spacing = 8
+        infoStack.setCustomSpacing(14, after: heroDescription)
+        infoStack.setCustomSpacing(14, after: heroSeparator)
+        infoStack.translatesAutoresizingMaskIntoConstraints = false
+        heroCard.addSubview(infoStack)
+
+        NSLayoutConstraint.activate([
+            heroThumb.topAnchor.constraint(equalTo: heroCard.topAnchor),
+            heroThumb.leadingAnchor.constraint(equalTo: heroCard.leadingAnchor),
+            heroThumb.trailingAnchor.constraint(equalTo: heroCard.trailingAnchor),
+            heroThumb.heightAnchor.constraint(equalToConstant: 180),
+
+            infoStack.topAnchor.constraint(equalTo: heroThumb.bottomAnchor, constant: 16),
+            infoStack.leadingAnchor.constraint(equalTo: heroCard.leadingAnchor, constant: 16),
+            infoStack.trailingAnchor.constraint(equalTo: heroCard.trailingAnchor, constant: -16),
+            infoStack.bottomAnchor.constraint(equalTo: heroCard.bottomAnchor, constant: -16),
+
+            heroSeparator.heightAnchor.constraint(equalToConstant: 1),
+        ])
+
+        // 包進帶左右 padding 的 container 後設成 tableHeaderView
+        let container = UIView()
+        container.backgroundColor = .clear
+        container.addSubview(heroCard)
+
+        NSLayoutConstraint.activate([
+            heroCard.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 16),
+            heroCard.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -16),
+            heroCard.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
+            heroCard.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
+        ])
+
+        // 圖片自己圓角（只圓上半），heroCard masksToBounds = false 才能露出陰影
+        AppTheme.Shadow.card(on: heroCard.layer)
+        heroCard.layer.masksToBounds = false
+        heroThumb.layer.cornerRadius = AppTheme.Radius.card
+        heroThumb.layer.cornerCurve = .continuous
+        heroThumb.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        heroThumb.layer.masksToBounds = true
+
+        tableView.tableHeaderView = container
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        guard let header = tableView.tableHeaderView else { return }
+        let targetWidth = tableView.bounds.width
+        guard targetWidth > 0 else { return }
+
+        let fitted = header.systemLayoutSizeFitting(
+            CGSize(width: targetWidth, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+
+        if abs(header.frame.height - fitted.height) > 0.5 || header.frame.width != targetWidth {
+            header.frame = CGRect(x: 0, y: 0, width: targetWidth, height: fitted.height)
+            tableView.tableHeaderView = header
+        }
+    }
+
+    @objc private func heroStepperChanged(_ sender: UIStepper) {
+        refreshHero(stepperValue: sender.value)
+    }
+
+    private func refreshHero(stepperValue: Double) {
+        heroThumb.image = UIImage(named: productData.imgName)
+        heroName.text = productData.name
+        heroContent.text = productData.content
+        heroDescription.text = productData.description
+
+        let moneySub = productData.price.dropFirst()
+        let moneyDouble = Double(String(moneySub)) ?? 0
+
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "zh_tw")
+        formatter.numberStyle = .currencyISOCode
+        formatter.maximumFractionDigits = 0
+
+        let total = stepperValue == 0 ? moneyDouble : moneyDouble * (stepperValue + 1)
+        heroPrice.text = formatter.string(from: NSNumber(value: total))
+        heroCountValue.text = "\(Int(stepperValue + 1))"
+    }
+
+    // MARK: - 表單樣式（姓名、大小、糖、冰、加料）
+
     private func applyStyle() {
-        dtImgView.contentMode = .scaleAspectFill
-        dtImgView.layer.cornerRadius = 16
-        dtImgView.layer.cornerCurve = .continuous
-        dtImgView.layer.masksToBounds = true
-        dtImgView.backgroundColor = AppTheme.imagePlaceholder
-
-        dtNameLabel.font = AppTheme.Font.detailTitle
-        dtNameLabel.textColor = AppTheme.primaryText
-
-        dtPriceLabel.font = AppTheme.Font.priceLarge
-        dtPriceLabel.textColor = AppTheme.accent
-
-        productCountLabel.font = .systemFont(ofSize: 15, weight: .medium)
-        productCountLabel.textColor = AppTheme.secondaryText
-
-        dtStepper.tintColor = AppTheme.accent
-
         orderNameTextField.borderStyle = .none
         orderNameTextField.backgroundColor = AppTheme.inputBackground
         orderNameTextField.layer.cornerRadius = AppTheme.Radius.input
@@ -132,8 +272,16 @@ class MenuDetailTableViewController: UITableViewController {
         tableView.contentInset.bottom = 84
     }
 
+    // MARK: - Static cells 高度（row 0 隱藏）
+
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        guard indexPath.row < staticHeights.count else { return 0 }
+        return staticHeights[indexPath.row]
+    }
+
     override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        // 拿掉 storyboard 的 systemGray4 / 5 / 6 條紋
+        if indexPath.row == 0 { return } // hero card 取代
+
         cell.backgroundColor = .clear
         cell.contentView.backgroundColor = .clear
 
@@ -155,51 +303,23 @@ class MenuDetailTableViewController: UITableViewController {
         }
     }
 
-    //為stepper寫的轉換字串, 用以更新 dtPriceLabel、productCountLabel
-    func updatePriceLabel(priceData: String, senderValue: Double?) {
-        let moneySubStr = priceData.dropFirst()
-        let moneyStr = String(moneySubStr)
-        let moneyDouble = Double(moneyStr)
-        guard let moneyDouble = moneyDouble else { return }
+    // MARK: - Storyboard IBAction（保留以避免 storyboard 連結失效，實際 stepper 改用 hero）
 
-        let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "zh_tw")
-        formatter.numberStyle = .currencyISOCode
-        //顯示為沒有小數點的貨幣
-        formatter.maximumFractionDigits = 0
-
-        if senderValue != 0 {
-            let dtPriceStr = formatter.string(from: NSNumber(value: moneyDouble * (senderValue! + 1)))
-            dtPriceLabel.text = dtPriceStr
-        } else {
-            let dtPriceStr = formatter.string(from: NSNumber(value: moneyDouble))
-            dtPriceLabel.text = dtPriceStr
-        }
-
-        //顯示訂購量
-        productCountLabel.text = " " + "\(Int(dtStepper.value + 1))" + "杯"
-    }
-
-    //以下UI元件
     @IBAction func stepperTapped(_ sender: UIStepper) {
-        updatePriceLabel(priceData: productData!.price, senderValue: sender.value)
-        print(sender.value)
+        refreshHero(stepperValue: sender.value)
     }
-
 
     @IBAction func orderSended(_ sender: UIButton) {
         if orderNameTextField.text?.trimmingCharacters(in: .whitespaces).isEmpty == false {
 
             db?.collection("orderList").addDocument(data: [
-
                 "orderName": orderNameTextField.text ?? "",
-                "drinkName": dtNameLabel.text ?? "",
+                "drinkName": productData.name,
                 "drinkSize": orderSizeSegCon.titleForSegment(at: orderSizeSegCon.selectedSegmentIndex) ?? "",
                 "sugar": orderSugarSegCon.titleForSegment(at: orderSugarSegCon.selectedSegmentIndex) ?? "",
                 "cold": orderIceSegCon.titleForSegment(at: orderIceSegCon.selectedSegmentIndex) ?? "",
                 "add": orderAddSegCon.titleForSegment(at: orderAddSegCon.selectedSegmentIndex) ?? "",
-                "price": dtPriceLabel.text ?? ""
-
+                "price": heroPrice.text ?? "",
             ]) { error in
                 if let error = error { print(error) }
             }
@@ -211,10 +331,9 @@ class MenuDetailTableViewController: UITableViewController {
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
             let request = UNNotificationRequest(identifier: "noti", content: content, trigger: trigger)
 
-            UNUserNotificationCenter.current().add(request) { error in
+            UNUserNotificationCenter.current().add(request) { _ in
                 print("成功建立前景通知")
             }
-
 
             self.performSegue(withIdentifier: "orderSendedDB", sender: nil)
 
@@ -225,10 +344,5 @@ class MenuDetailTableViewController: UITableViewController {
             present(alert, animated: true, completion: nil)
             print("購買人欄位為空")
         }
-
-
-
     }
-
-
 }
