@@ -31,45 +31,42 @@ class MenuTableViewCell: UITableViewCell {
         clipsToBounds = false
 
         card.translatesAutoresizingMaskIntoConstraints = false
-        card.backgroundColor = .secondarySystemGroupedBackground
-        card.layer.cornerRadius = 18
+        card.backgroundColor = AppTheme.cardBackground
+        card.layer.cornerRadius = AppTheme.Radius.card
         card.layer.cornerCurve = .continuous
-        card.layer.shadowColor = UIColor.black.cgColor
-        card.layer.shadowOpacity = 0.06
-        card.layer.shadowRadius = 10
-        card.layer.shadowOffset = CGSize(width: 0, height: 4)
+        AppTheme.Shadow.card(on: card.layer)
         contentView.addSubview(card)
 
         thumb.translatesAutoresizingMaskIntoConstraints = false
         thumb.contentMode = .scaleAspectFill
-        thumb.layer.cornerRadius = 12
+        thumb.layer.cornerRadius = AppTheme.Radius.thumb
         thumb.layer.cornerCurve = .continuous
         thumb.layer.masksToBounds = true
-        thumb.backgroundColor = .tertiarySystemFill
+        thumb.backgroundColor = AppTheme.imagePlaceholder
         card.addSubview(thumb)
 
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        nameLabel.font = .systemFont(ofSize: 17, weight: .semibold)
-        nameLabel.textColor = .label
+        nameLabel.font = AppTheme.Font.cardTitle
+        nameLabel.textColor = AppTheme.primaryText
         nameLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
         card.addSubview(nameLabel)
 
         priceLabel.translatesAutoresizingMaskIntoConstraints = false
-        priceLabel.font = .monospacedDigitSystemFont(ofSize: 15, weight: .bold)
-        priceLabel.textColor = UIColor(named: "AccentColor") ?? .systemOrange
+        priceLabel.font = AppTheme.Font.priceMedium
+        priceLabel.textColor = AppTheme.accent
         priceLabel.textAlignment = .right
         priceLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         priceLabel.setContentHuggingPriority(.required, for: .horizontal)
         card.addSubview(priceLabel)
 
         contentLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentLabel.font = .systemFont(ofSize: 13, weight: .regular)
-        contentLabel.textColor = .secondaryLabel
+        contentLabel.font = AppTheme.Font.secondary
+        contentLabel.textColor = AppTheme.secondaryText
         card.addSubview(contentLabel)
 
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
-        descriptionLabel.font = .systemFont(ofSize: 12, weight: .regular)
-        descriptionLabel.textColor = .tertiaryLabel
+        descriptionLabel.font = AppTheme.Font.caption
+        descriptionLabel.textColor = AppTheme.tertiaryText
         descriptionLabel.numberOfLines = 2
         card.addSubview(descriptionLabel)
 
@@ -151,7 +148,7 @@ class MenuTableViewController: UITableViewController {
 //        bd = Firestore.firestore()
 
         tableView.separatorStyle = .none
-        tableView.backgroundColor = .systemGroupedBackground
+        tableView.backgroundColor = AppTheme.pageBackground
         tableView.rowHeight = 116
         tableView.contentInset = UIEdgeInsets(top: 4, left: 0, bottom: 16, right: 0)
     }

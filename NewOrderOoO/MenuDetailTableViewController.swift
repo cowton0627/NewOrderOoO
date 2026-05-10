@@ -49,7 +49,7 @@ class MenuDetailTableViewController: UITableViewController {
         super.viewDidLoad()
         tableView.isScrollEnabled = false
         tableView.separatorStyle = .none
-        tableView.backgroundColor = .systemGroupedBackground
+        tableView.backgroundColor = AppTheme.pageBackground
 
         applyStyle()
 
@@ -61,49 +61,47 @@ class MenuDetailTableViewController: UITableViewController {
     }
 
     private func applyStyle() {
-        let accent = UIColor(named: "AccentColor") ?? .systemOrange
-
         dtImgView.contentMode = .scaleAspectFill
         dtImgView.layer.cornerRadius = 16
         dtImgView.layer.cornerCurve = .continuous
         dtImgView.layer.masksToBounds = true
-        dtImgView.backgroundColor = .tertiarySystemFill
+        dtImgView.backgroundColor = AppTheme.imagePlaceholder
 
-        dtNameLabel.font = .systemFont(ofSize: 24, weight: .bold)
-        dtNameLabel.textColor = .label
+        dtNameLabel.font = AppTheme.Font.detailTitle
+        dtNameLabel.textColor = AppTheme.primaryText
 
-        dtPriceLabel.font = .monospacedDigitSystemFont(ofSize: 22, weight: .bold)
-        dtPriceLabel.textColor = accent
+        dtPriceLabel.font = AppTheme.Font.priceLarge
+        dtPriceLabel.textColor = AppTheme.accent
 
         productCountLabel.font = .systemFont(ofSize: 15, weight: .medium)
-        productCountLabel.textColor = .secondaryLabel
+        productCountLabel.textColor = AppTheme.secondaryText
 
-        dtStepper.tintColor = accent
+        dtStepper.tintColor = AppTheme.accent
 
         orderNameTextField.borderStyle = .none
-        orderNameTextField.backgroundColor = .tertiarySystemFill
-        orderNameTextField.layer.cornerRadius = 10
+        orderNameTextField.backgroundColor = AppTheme.inputBackground
+        orderNameTextField.layer.cornerRadius = AppTheme.Radius.input
         orderNameTextField.layer.cornerCurve = .continuous
         orderNameTextField.layer.masksToBounds = true
-        orderNameTextField.font = .systemFont(ofSize: 16, weight: .regular)
+        orderNameTextField.font = AppTheme.Font.body
         let leftPad = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 0))
         orderNameTextField.leftView = leftPad
         orderNameTextField.leftViewMode = .always
         orderNameTextField.attributedPlaceholder = NSAttributedString(
             string: "請輸入姓名",
-            attributes: [.foregroundColor: UIColor.tertiaryLabel]
+            attributes: [.foregroundColor: AppTheme.tertiaryText]
         )
 
         let segments: [UISegmentedControl?] = [orderSizeSegCon, orderSugarSegCon, orderIceSegCon, orderAddSegCon]
         for seg in segments {
-            seg?.selectedSegmentTintColor = accent
+            seg?.selectedSegmentTintColor = AppTheme.accent
             seg?.setTitleTextAttributes([
-                .foregroundColor: UIColor.label,
-                .font: UIFont.systemFont(ofSize: 14, weight: .medium)
+                .foregroundColor: AppTheme.primaryText,
+                .font: AppTheme.Font.segmentNormal
             ], for: .normal)
             seg?.setTitleTextAttributes([
-                .foregroundColor: UIColor.white,
-                .font: UIFont.systemFont(ofSize: 14, weight: .semibold)
+                .foregroundColor: AppTheme.onAccentText,
+                .font: AppTheme.Font.segmentSelected
             ], for: .selected)
         }
 
@@ -117,14 +115,11 @@ class MenuDetailTableViewController: UITableViewController {
         tableView.tableFooterView = nil
 
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.layer.cornerRadius = 14
+        button.layer.cornerRadius = AppTheme.Radius.button
         button.layer.cornerCurve = .continuous
         button.layer.masksToBounds = false
-        button.layer.shadowColor = UIColor.black.cgColor
-        button.layer.shadowOpacity = 0.18
-        button.layer.shadowRadius = 14
-        button.layer.shadowOffset = CGSize(width: 0, height: 6)
-        button.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
+        AppTheme.Shadow.button(on: button.layer)
+        button.titleLabel?.font = AppTheme.Font.buttonLabel
 
         view.addSubview(button)
         NSLayoutConstraint.activate([
@@ -146,8 +141,8 @@ class MenuDetailTableViewController: UITableViewController {
         if cell.viewWithTag(cardTag) == nil {
             let card = UIView()
             card.tag = cardTag
-            card.backgroundColor = .secondarySystemGroupedBackground
-            card.layer.cornerRadius = 14
+            card.backgroundColor = AppTheme.cardBackground
+            card.layer.cornerRadius = AppTheme.Radius.cardInner
             card.layer.cornerCurve = .continuous
             card.translatesAutoresizingMaskIntoConstraints = false
             cell.contentView.insertSubview(card, at: 0)

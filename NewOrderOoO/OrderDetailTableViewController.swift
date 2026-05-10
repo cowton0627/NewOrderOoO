@@ -99,8 +99,9 @@ class OrderDetailTableViewController: UITableViewController {
         
         cell.portraitImgView.image = UIImage(named: "00"+"\(Int.random(in: 1...8))")
         cell.portraitImgView.layer.cornerRadius = 125 / 2
+        cell.portraitImgView.layer.masksToBounds = true
         cell.orderNameLabel.text = orderData.orderName
-        cell.orderNameLabel.textColor = #colorLiteral(red: 0.7450980544, green: 0.1568627506, blue: 0.07450980693, alpha: 1)
+        cell.orderNameLabel.textColor = AppTheme.accent
         cell.drinkNameLabel.text = orderData.drinkName
         cell.drinkSizeLabel.text = orderData.drinkSize
         cell.sugarLabel.text = orderData.sugar
@@ -136,7 +137,7 @@ class OrderDetailTableViewController: UITableViewController {
             completionHandler(true)
         }
         
-        doNothingAction.backgroundColor = #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1)
+        doNothingAction.backgroundColor = AppTheme.success
         
         UISwipeActionsConfiguration(actions: [deleteAction, doNothingAction]).performsFirstActionWithFullSwipe = true
         return UISwipeActionsConfiguration(actions: [deleteAction, doNothingAction])
