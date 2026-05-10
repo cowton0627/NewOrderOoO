@@ -14,6 +14,7 @@ protocol OrderRepository {
     func placeOrder(_ input: OrderInput) async throws -> String
     func fetchOrders() async throws -> [OrderData]
     func deleteOrder(id: String) async throws
+    func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn) async throws
 }
 
 enum RepositoryError: LocalizedError {
@@ -67,5 +68,16 @@ final class FirestoreOrderRepository: OrderRepository {
     func deleteOrder(id: String) async throws {
         _ = try currentUid()
         try await db.collection(collectionName).document(id).delete()
+    }
+
+    func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn) async throws {
+        _ = try currentUid()
+        try await db.collection(collectionName).document(id).updateData([
+            "orderName": orderName,
+            "drinkSize": size.rawValue,
+            "sugar": sugar.rawValue,
+            "cold": ice.rawValue,
+            "add": add.rawValue,
+        ])
     }
 }

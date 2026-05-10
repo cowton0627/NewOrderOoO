@@ -249,6 +249,17 @@ class OrderDetailTableViewController: UITableViewController {
         return cell
     }
 
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let order = viewModel.order(at: indexPath.row)
+        guard let id = order.id else { return }
+        let edit = EditOrderViewController()
+        edit.orderID = id
+        edit.initialOrder = order
+        edit.onSaved = { [weak self] in self?.fetchData() }
+        navigationController?.pushViewController(edit, animated: true)
+    }
+
     //設定cell可swipe
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
 
