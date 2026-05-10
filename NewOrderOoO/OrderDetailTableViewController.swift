@@ -129,6 +129,7 @@ class OrderDetailTableViewController: UITableViewController {
 
     private let bannerImageView = UIImageView()
     private let viewModel = OrderListViewModel()
+    private let statusOverlay = StatusOverlayView()
 
     struct cellKey {
         static let OrderDetailTableViewCell = "OrderDetailTableViewCell"
@@ -147,8 +148,21 @@ class OrderDetailTableViewController: UITableViewController {
 
         setupBannerHeader()
         startBannerAnimation()
+        setupStatusOverlay()
 
         fetchData()
+    }
+
+    private func setupStatusOverlay() {
+        statusOverlay.translatesAutoresizingMaskIntoConstraints = false
+        statusOverlay.isHidden = true
+        view.addSubview(statusOverlay)
+        NSLayoutConstraint.activate([
+            statusOverlay.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            statusOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            statusOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            statusOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
     }
 
     private func setupBannerHeader() {
@@ -200,15 +214,25 @@ class OrderDetailTableViewController: UITableViewController {
     }
 
     func fetchData() {
+        statusOverlay.show(.loading)
         Task { [weak self] in
             guard let self = self else { return }
             do {
                 try await self.viewModel.load()
                 await MainActor.run {
                     self.tableView.reloadData()
+                    if self.viewModel.numberOfOrders == 0 {
+                        self.statusOverlay.show(.empty(title: "還沒有訂單", message: "下訂後會出現在這裡"))
+                    } else {
+                        self.statusOverlay.hide()
+                    }
                 }
             } catch {
-                print("fetchOrders failed: \(error)")
+                await MainActor.run {
+                    self.statusOverlay.show(.error(message: error.localizedDescription, retry: { [weak self] in
+                        self?.fetchData()
+                    }))
+                }
             }
         }
     }
@@ -239,6 +263,11 @@ class OrderDetailTableViewController: UITableViewController {
             Task {
                 do {
                     try await self.viewModel.delete(at: indexPath.row)
+                    await MainActor.run {
+                        if self.viewModel.numberOfOrders == 0 {
+                            self.statusOverlay.show(.empty(title: "還沒有訂單", message: "下訂後會出現在這裡"))
+                        }
+                    }
                 } catch {
                     print("deleteOrder failed: \(error)")
                 }
