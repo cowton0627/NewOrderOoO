@@ -7,7 +7,6 @@
 
 import UIKit
 import Foundation
-import FirebaseFirestore
 
 class MenuDetailTableViewController: UITableViewController {
     // storyboard 上原本第 1 個 cell 的 outlet 仍保留（cell 高度設 0 隱藏），但實際 UI 改用下方 hero card。
@@ -23,7 +22,7 @@ class MenuDetailTableViewController: UITableViewController {
     @IBOutlet weak var orderIceSegCon: UISegmentedControl!
     @IBOutlet weak var orderAddSegCon: UISegmentedControl!
 
-    var db: Firestore!
+    var orderRepository: OrderRepository = FirestoreOrderRepository()
     var productData: ProductData!
 
     // MARK: - Hero card (取代 storyboard row 0)
@@ -52,8 +51,6 @@ class MenuDetailTableViewController: UITableViewController {
         applyStyle()
         buildHeroHeader()
         refreshHero(stepperValue: 0)
-
-        db = Firestore.firestore()
     }
 
     // MARK: - Hero card
@@ -324,39 +321,57 @@ class MenuDetailTableViewController: UITableViewController {
     }
 
     @IBAction func orderSended(_ sender: UIButton) {
-        if orderNameTextField.text?.trimmingCharacters(in: .whitespaces).isEmpty == false {
-
-            db?.collection("orderList").addDocument(data: [
-                "orderName": orderNameTextField.text ?? "",
-                "drinkName": productData.name,
-                "drinkSize": orderSizeSegCon.titleForSegment(at: orderSizeSegCon.selectedSegmentIndex) ?? "",
-                "sugar": orderSugarSegCon.titleForSegment(at: orderSugarSegCon.selectedSegmentIndex) ?? "",
-                "cold": orderIceSegCon.titleForSegment(at: orderIceSegCon.selectedSegmentIndex) ?? "",
-                "add": orderAddSegCon.titleForSegment(at: orderAddSegCon.selectedSegmentIndex) ?? "",
-                "price": heroPrice.text ?? "",
-            ]) { error in
-                if let error = error { print(error) }
-            }
-
-            let content = UNMutableNotificationContent()
-            content.title = "wow！恭喜您～"
-            content.subtitle = "訂購成功"
-
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
-            let request = UNNotificationRequest(identifier: "noti", content: content, trigger: trigger)
-
-            UNUserNotificationCenter.current().add(request) { _ in
-                print("成功建立前景通知")
-            }
-
-            self.performSegue(withIdentifier: "orderSendedDB", sender: nil)
-
-        } else {
-            let alert = UIAlertController(title: "注意", message: "姓名欄不得為空", preferredStyle: .alert)
-            let alertAction = UIAlertAction(title: "上一步", style: .cancel, handler: nil)
-            alert.addAction(alertAction)
-            present(alert, animated: true, completion: nil)
-            print("購買人欄位為空")
+        let name = orderNameTextField.text?.trimmingCharacters(in: .whitespaces) ?? ""
+        guard !name.isEmpty else {
+            presentInfoAlert(message: "姓名欄不得為空")
+            return
         }
+        guard let unitPrice = Money.parse(productData.price) else {
+            presentInfoAlert(message: "價格格式錯誤")
+            return
+        }
+
+        let input = OrderInput(
+            orderName: name,
+            drinkName: productData.name,
+            size: DrinkSize.allCases[orderSizeSegCon.selectedSegmentIndex],
+            sugar: SugarLevel.allCases[orderSugarSegCon.selectedSegmentIndex],
+            ice: IceLevel.allCases[orderIceSegCon.selectedSegmentIndex],
+            add: AddOn.allCases[orderAddSegCon.selectedSegmentIndex],
+            unitPrice: unitPrice,
+            quantity: Int(heroStepper.value) + 1
+        )
+
+        Task { [weak self] in
+            guard let self = self else { return }
+            do {
+                _ = try await self.orderRepository.placeOrder(input)
+                await MainActor.run {
+                    self.scheduleSuccessNotification()
+                    self.performSegue(withIdentifier: "orderSendedDB", sender: nil)
+                }
+            } catch {
+                await MainActor.run {
+                    self.presentInfoAlert(message: "下單失敗:\(error.localizedDescription)")
+                }
+            }
+        }
+    }
+
+    private func scheduleSuccessNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "wow!恭喜您~"
+        content.subtitle = "訂購成功"
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+        let request = UNNotificationRequest(identifier: "noti", content: content, trigger: trigger)
+
+        UNUserNotificationCenter.current().add(request) { _ in }
+    }
+
+    private func presentInfoAlert(message: String) {
+        let alert = UIAlertController(title: "注意", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "好", style: .cancel))
+        present(alert, animated: true)
     }
 }

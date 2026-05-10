@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import FirebaseFirestore
 
 class OrderDetailTableViewCell: UITableViewCell {
     // 保留 storyboard outlet 防失連，實際 UI 由 awakeFromNib 重畫。
@@ -130,7 +129,7 @@ class OrderDetailTableViewController: UITableViewController {
 
     private let bannerImageView = UIImageView()
 
-    var db: Firestore!
+    var orderRepository: OrderRepository = FirestoreOrderRepository()
 
     struct cellKey {
         static let OrderDetailTableViewCell = "OrderDetailTableViewCell"
@@ -152,7 +151,6 @@ class OrderDetailTableViewController: UITableViewController {
         setupBannerHeader()
         startBannerAnimation()
 
-        db = Firestore.firestore()
         fetchData()
     }
 
@@ -205,15 +203,16 @@ class OrderDetailTableViewController: UITableViewController {
     }
 
     func fetchData() {
-        db.collection("orderList").getDocuments { (querySnapshot, error) in
-            guard let querySnapshot = querySnapshot else { return }
-            let orderDatas = querySnapshot.documents.compactMap { queryDocumentSnapshot in
-                try? queryDocumentSnapshot.data(as: OrderData.self)
-            }
-            self.orderDatas = orderDatas
-
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
+        Task { [weak self] in
+            guard let self = self else { return }
+            do {
+                let orders = try await self.orderRepository.fetchOrders()
+                await MainActor.run {
+                    self.orderDatas = orders
+                    self.tableView.reloadData()
+                }
+            } catch {
+                print("fetchOrders failed: \(error)")
             }
         }
     }
@@ -238,20 +237,23 @@ class OrderDetailTableViewController: UITableViewController {
     //設定cell可swipe
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
 
-        let deleteAction = UIContextualAction(style: .destructive, title: "刪除") { (action, view, completionHandler) in
-
-            guard let id = self.orderDatas[indexPath.row].id else { return }
-            self.db.collection("orderList").document(id).delete { error in
-                if let error = error {
-                    print("Error: \(error)")
-                } else {
-                    print("Current list has been deleted!")
-                }
+        let deleteAction = UIContextualAction(style: .destructive, title: "刪除") { [weak self] (_, _, completionHandler) in
+            guard let self = self,
+                  let id = self.orderDatas[indexPath.row].id else {
+                completionHandler(false)
+                return
             }
-
             self.orderDatas.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
             completionHandler(true)
+
+            Task {
+                do {
+                    try await self.orderRepository.deleteOrder(id: id)
+                } catch {
+                    print("deleteOrder failed: \(error)")
+                }
+            }
         }
 
         let doNothingAction = UIContextualAction(style: .normal, title: "考慮") { (action, view, completionHandler) in
