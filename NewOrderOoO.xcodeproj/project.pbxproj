@@ -26,6 +26,7 @@
 		293863AB26CBABEF0010E2A5 /* OrderRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293863AA26CBABEF0010E2A5 /* OrderRepository.swift */; };
 		293863AD26CBAC000010E2A5 /* ViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293863AC26CBAC000010E2A5 /* ViewModels.swift */; };
 		293863AF26CBAC110010E2A5 /* StatusOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293863AE26CBAC110010E2A5 /* StatusOverlayView.swift */; };
+		293863B126CBAC220010E2A5 /* ReceiptViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293863B026CBAC220010E2A5 /* ReceiptViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,7 @@
 		293863AA26CBABEF0010E2A5 /* OrderRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderRepository.swift; sourceTree = "<group>"; };
 		293863AC26CBAC000010E2A5 /* ViewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModels.swift; sourceTree = "<group>"; };
 		293863AE26CBAC110010E2A5 /* StatusOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusOverlayView.swift; sourceTree = "<group>"; };
+		293863B026CBAC220010E2A5 /* ReceiptViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceiptViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +109,7 @@
 				293863AA26CBABEF0010E2A5 /* OrderRepository.swift */,
 				293863AC26CBAC000010E2A5 /* ViewModels.swift */,
 				293863AE26CBAC110010E2A5 /* StatusOverlayView.swift */,
+				293863B026CBAC220010E2A5 /* ReceiptViewController.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -199,6 +202,7 @@
 				293863AB26CBABEF0010E2A5 /* OrderRepository.swift in Sources */,
 				293863AD26CBAC000010E2A5 /* ViewModels.swift in Sources */,
 				293863AF26CBAC110010E2A5 /* StatusOverlayView.swift in Sources */,
+				293863B126CBAC220010E2A5 /* ReceiptViewController.swift in Sources */,
 				2938639526C92A8D0010E2A5 /* OrderDetailTableViewController.swift in Sources */,
 				2938637D26C926490010E2A5 /* AppDelegate.swift in Sources */,
 				2938637F26C926490010E2A5 /* SceneDelegate.swift in Sources */,

@@ -326,12 +326,16 @@ class MenuDetailTableViewController: UITableViewController {
         Task { [weak self] in
             guard let self = self else { return }
             do {
-                _ = try await self.viewModel.placeOrder(
+                let orderID = try await self.viewModel.placeOrder(
                     name: name, size: size, sugar: sugar, ice: ice, add: add, quantity: quantity
                 )
                 await MainActor.run {
                     self.scheduleSuccessNotification()
-                    self.performSegue(withIdentifier: "orderSendedDB", sender: nil)
+                    self.pushReceipt(
+                        orderID: orderID, name: name,
+                        size: size, sugar: sugar, ice: ice, add: add,
+                        quantity: quantity
+                    )
                 }
             } catch {
                 await MainActor.run {
@@ -339,6 +343,21 @@ class MenuDetailTableViewController: UITableViewController {
                 }
             }
         }
+    }
+
+    private func pushReceipt(orderID: String, name: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn, quantity: Int) {
+        guard let unitPrice = Money.parse(viewModel.product.price) else { return }
+        let summary = ReceiptSummary(
+            orderName: name.trimmingCharacters(in: .whitespaces),
+            drinkName: viewModel.product.name,
+            size: size, sugar: sugar, ice: ice, add: add,
+            quantity: quantity,
+            totalPrice: unitPrice * quantity,
+            orderID: orderID
+        )
+        let receipt = ReceiptViewController()
+        receipt.summary = summary
+        navigationController?.pushViewController(receipt, animated: true)
     }
 
     private func scheduleSuccessNotification() {
