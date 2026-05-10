@@ -15,6 +15,8 @@ protocol OrderRepository {
     func fetchOrders() async throws -> [OrderData]
     func deleteOrder(id: String) async throws
     func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn) async throws
+    /// 一次性把沒有 uid 欄位的舊訂單收編到當前 user。
+    func migrateLegacyOrdersIfNeeded() async throws
 }
 
 enum RepositoryError: LocalizedError {
@@ -79,5 +81,24 @@ final class FirestoreOrderRepository: OrderRepository {
             "cold": ice.rawValue,
             "add": add.rawValue,
         ])
+    }
+
+    private static let migrationDoneKey = "OrderRepository.migratedLegacyOrders.v1"
+
+    func migrateLegacyOrdersIfNeeded() async throws {
+        if UserDefaults.standard.bool(forKey: Self.migrationDoneKey) { return }
+        let uid = try currentUid()
+
+        // Firestore 不支援 query「沒有某個欄位」,所以全 fetch 後逐筆檢查。
+        // 只有 demo 階段資料量小可以這樣做。
+        let snapshot = try await db.collection(collectionName).getDocuments()
+        for doc in snapshot.documents {
+            let data = doc.data()
+            let existingUid = data["uid"] as? String
+            if existingUid == nil || existingUid?.isEmpty == true {
+                try? await doc.reference.updateData(["uid": uid])
+            }
+        }
+        UserDefaults.standard.set(true, forKey: Self.migrationDoneKey)
     }
 }
