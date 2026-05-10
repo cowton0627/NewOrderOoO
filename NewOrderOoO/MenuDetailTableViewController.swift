@@ -65,7 +65,7 @@ class MenuDetailTableViewController: UITableViewController {
         heroCard.layer.cornerCurve = .continuous
 
         heroThumb.translatesAutoresizingMaskIntoConstraints = false
-        heroThumb.contentMode = .scaleAspectFill
+        heroThumb.contentMode = .scaleAspectFit
         heroThumb.backgroundColor = AppTheme.imagePlaceholder
         heroThumb.clipsToBounds = true
         heroCard.addSubview(heroThumb)
