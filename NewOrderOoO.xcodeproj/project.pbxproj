@@ -22,6 +22,7 @@
 		293863A126C97C210010E2A5 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 293863A026C97C210010E2A5 /* FirebaseFirestore */; };
 		293863A326CA5D6D0010E2A5 /* OrderData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293863A226CA5D6D0010E2A5 /* OrderData.swift */; };
 		293863A726CBABCD0010E2A5 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293863A626CBABCD0010E2A5 /* AppTheme.swift */; };
+		293863A926CBABDE0010E2A5 /* DomainModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293863A826CBABDE0010E2A5 /* DomainModels.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +40,7 @@
 		2938639926C97AEA0010E2A5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		293863A226CA5D6D0010E2A5 /* OrderData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderData.swift; sourceTree = "<group>"; };
 		293863A626CBABCD0010E2A5 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		293863A826CBABDE0010E2A5 /* DomainModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +97,7 @@
 				2938639626C92A9C0010E2A5 /* ProductData.swift */,
 				293863A226CA5D6D0010E2A5 /* OrderData.swift */,
 				293863A626CBABCD0010E2A5 /* AppTheme.swift */,
+				293863A826CBABDE0010E2A5 /* DomainModels.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -183,6 +186,7 @@
 				2938639326C92A780010E2A5 /* MenuDetailTableViewController.swift in Sources */,
 				293863A326CA5D6D0010E2A5 /* OrderData.swift in Sources */,
 				293863A726CBABCD0010E2A5 /* AppTheme.swift in Sources */,
+				293863A926CBABDE0010E2A5 /* DomainModels.swift in Sources */,
 				2938639526C92A8D0010E2A5 /* OrderDetailTableViewController.swift in Sources */,
 				2938637D26C926490010E2A5 /* AppDelegate.swift in Sources */,
 				2938637F26C926490010E2A5 /* SceneDelegate.swift in Sources */,
