@@ -94,22 +94,18 @@ final class FirestoreOrderRepository: OrderRepository {
         ])
     }
 
-    private static let migrationDoneKey = "OrderRepository.migratedLegacyOrders.v1"
-
+    /// Demo-only:把所有 uid 不是當前 user 的訂單接管過來。
+    /// 場景:simulator 重新安裝後 anonymous uid 換了,舊資料卡在前一個 uid。
+    /// 單用戶 demo 可接受;production / multi-user 必須關掉。
     func migrateLegacyOrdersIfNeeded() async throws {
-        if UserDefaults.standard.bool(forKey: Self.migrationDoneKey) { return }
         let uid = try await currentUid()
 
-        // Firestore 不支援 query「沒有某個欄位」,所以全 fetch 後逐筆檢查。
-        // 只有 demo 階段資料量小可以這樣做。
         let snapshot = try await db.collection(collectionName).getDocuments()
         for doc in snapshot.documents {
-            let data = doc.data()
-            let existingUid = data["uid"] as? String
-            if existingUid == nil || existingUid?.isEmpty == true {
+            let existingUid = doc.data()["uid"] as? String
+            if existingUid != uid {
                 try? await doc.reference.updateData(["uid": uid])
             }
         }
-        UserDefaults.standard.set(true, forKey: Self.migrationDoneKey)
     }
 }
