@@ -154,15 +154,11 @@ class OrderDetailTableViewController: UITableViewController {
     }
 
     private func setupStatusOverlay() {
-        statusOverlay.translatesAutoresizingMaskIntoConstraints = false
+        // 用 tableView.backgroundView 不用 view.addSubview:
+        // backgroundView 在 contentView 後面、cells 之下,但 tableHeaderView (GIF banner)
+        // 仍在前面正常顯示,不會被蓋。有 cells 時 cells 自動把 overlay 遮掉。
         statusOverlay.isHidden = true
-        view.addSubview(statusOverlay)
-        NSLayoutConstraint.activate([
-            statusOverlay.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            statusOverlay.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            statusOverlay.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            statusOverlay.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-        ])
+        tableView.backgroundView = statusOverlay
     }
 
     private func setupBannerHeader() {
