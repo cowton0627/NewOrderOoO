@@ -6,9 +6,7 @@
 //
 
 import UIKit
-import Firebase
-import FirebaseFirestoreSwift
-import FirebaseCoreDiagnostics
+import FirebaseCore
 import UserNotifications
 
 @main

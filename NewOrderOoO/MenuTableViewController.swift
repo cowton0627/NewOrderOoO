@@ -6,8 +6,7 @@
 //
 
 import UIKit
-import Firebase
-import FirebaseFirestoreSwift
+import FirebaseFirestore
 
 class MenuTableViewCell: UITableViewCell {
     @IBOutlet weak var pdImgView: UIImageView!

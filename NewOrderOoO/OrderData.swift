@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import FirebaseFirestoreSwift
+import FirebaseFirestore
 
 struct OrderData: Codable, Identifiable {
     @DocumentID var id: String?

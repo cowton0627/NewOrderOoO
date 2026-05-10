@@ -7,8 +7,7 @@
 
 import UIKit
 import Foundation
-import Firebase
-import FirebaseFirestoreSwift
+import FirebaseFirestore
 
 class MenuDetailTableViewController: UITableViewController {
     @IBOutlet weak var dtImgView: UIImageView!
