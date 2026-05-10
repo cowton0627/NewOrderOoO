@@ -126,7 +126,9 @@ class OrderDetailTableViewCell: UITableViewCell {
 
 
 class OrderDetailTableViewController: UITableViewController {
-    @IBOutlet weak var animeImgView: UIImageView!
+    @IBOutlet weak var animeImgView: UIImageView!  // storyboard 仍會 instantiate 此 view,但實際 banner 用 bannerImageView 取代
+
+    private let bannerImageView = UIImageView()
 
     var db: Firestore!
 
@@ -148,52 +150,50 @@ class OrderDetailTableViewController: UITableViewController {
         navigationItem.largeTitleDisplayMode = .always
 
         setupBannerHeader()
-
-        // GIF 動畫先設第一幀靜態圖再啟動動畫,避免 callback 在 outlet nil 時 crash
-        if let data = NSDataAsset(name: "anime")?.data {
-            let cfData = data as CFData
-            if let src = CGImageSourceCreateWithData(cfData, nil),
-               let cg = CGImageSourceCreateImageAtIndex(src, 0, nil) {
-                animeImgView?.image = UIImage(cgImage: cg)
-            }
-            CGAnimateImageDataWithBlock(cfData, nil) { [weak self] (_, cgImage, stop) in
-                guard let imgView = self?.animeImgView else {
-                    stop.pointee = true
-                    return
-                }
-                imgView.image = UIImage(cgImage: cgImage)
-            }
-        }
+        startBannerAnimation()
 
         db = Firestore.firestore()
         fetchData()
     }
 
     private func setupBannerHeader() {
-        guard let img = animeImgView else { return }
+        // 把 storyboard 帶來的 imageView 拆掉,避免重複出現在 view hierarchy
+        animeImgView?.removeFromSuperview()
 
         let container = UIView()
         container.backgroundColor = .clear
 
-        img.removeFromSuperview()
-        img.translatesAutoresizingMaskIntoConstraints = false
-        img.contentMode = .scaleAspectFill
-        img.clipsToBounds = true
-        img.layer.cornerRadius = AppTheme.Radius.card
-        img.layer.cornerCurve = .continuous
-        container.addSubview(img)
+        bannerImageView.translatesAutoresizingMaskIntoConstraints = false
+        bannerImageView.contentMode = .scaleAspectFill
+        bannerImageView.clipsToBounds = true
+        bannerImageView.layer.cornerRadius = AppTheme.Radius.card
+        bannerImageView.layer.cornerCurve = .continuous
+        bannerImageView.backgroundColor = AppTheme.imagePlaceholder
+        container.addSubview(bannerImageView)
 
         NSLayoutConstraint.activate([
-            img.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 16),
-            img.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -16),
-            img.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
-            img.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
-            img.heightAnchor.constraint(equalToConstant: 140),
+            bannerImageView.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 16),
+            bannerImageView.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -16),
+            bannerImageView.topAnchor.constraint(equalTo: container.topAnchor, constant: 8),
+            bannerImageView.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -8),
+            bannerImageView.heightAnchor.constraint(equalToConstant: 140),
         ])
 
         let width = tableView.bounds.width > 0 ? tableView.bounds.width : UIScreen.main.bounds.width
         container.frame = CGRect(x: 0, y: 0, width: width, height: 156)
         tableView.tableHeaderView = container
+    }
+
+    private func startBannerAnimation() {
+        guard let data = NSDataAsset(name: "anime")?.data else { return }
+        let cfData = data as CFData
+        CGAnimateImageDataWithBlock(cfData, nil) { [weak self] (_, cgImage, stop) in
+            guard let self = self else {
+                stop.pointee = true
+                return
+            }
+            self.bannerImageView.image = UIImage(cgImage: cgImage)
+        }
     }
 
     override func viewDidLayoutSubviews() {
