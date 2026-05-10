@@ -21,10 +21,14 @@ protocol OrderRepository {
 
 enum RepositoryError: LocalizedError {
     case notAuthenticated
+    case signInFailed(underlying: Error)
 
     var errorDescription: String? {
         switch self {
-        case .notAuthenticated: return "尚未登入,請稍後再試"
+        case .notAuthenticated:
+            return "尚未登入,請稍後再試"
+        case .signInFailed(let underlying):
+            return "登入失敗:\(underlying.localizedDescription)。\n請確認 Firebase Console > Authentication > Sign-in method 已啟用 Anonymous。"
         }
     }
 }
@@ -38,13 +42,20 @@ final class FirestoreOrderRepository: OrderRepository {
         self.collectionName = collectionName
     }
 
-    private func currentUid() throws -> String {
-        guard let uid = Auth.auth().currentUser?.uid else { throw RepositoryError.notAuthenticated }
-        return uid
+    /// 拿 uid:已登入直接回,沒登入主動觸發 anonymous sign-in 並等它完成。
+    /// 比 sync 版穩,即使 AppDelegate 的 anonymous sign-in 還沒完成也能擋住。
+    private func currentUid() async throws -> String {
+        if let uid = Auth.auth().currentUser?.uid { return uid }
+        do {
+            let result = try await Auth.auth().signInAnonymously()
+            return result.user.uid
+        } catch {
+            throw RepositoryError.signInFailed(underlying: error)
+        }
     }
 
     func placeOrder(_ input: OrderInput) async throws -> String {
-        let uid = try currentUid()
+        let uid = try await currentUid()
         let data: [String: Any] = [
             "orderName": input.orderName,
             "drinkName": input.drinkName,
@@ -60,7 +71,7 @@ final class FirestoreOrderRepository: OrderRepository {
     }
 
     func fetchOrders() async throws -> [OrderData] {
-        let uid = try currentUid()
+        let uid = try await currentUid()
         let snapshot = try await db.collection(collectionName)
             .whereField("uid", isEqualTo: uid)
             .getDocuments()
@@ -68,12 +79,12 @@ final class FirestoreOrderRepository: OrderRepository {
     }
 
     func deleteOrder(id: String) async throws {
-        _ = try currentUid()
+        _ = try await currentUid()
         try await db.collection(collectionName).document(id).delete()
     }
 
     func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn) async throws {
-        _ = try currentUid()
+        _ = try await currentUid()
         try await db.collection(collectionName).document(id).updateData([
             "orderName": orderName,
             "drinkSize": size.rawValue,
@@ -87,7 +98,7 @@ final class FirestoreOrderRepository: OrderRepository {
 
     func migrateLegacyOrdersIfNeeded() async throws {
         if UserDefaults.standard.bool(forKey: Self.migrationDoneKey) { return }
-        let uid = try currentUid()
+        let uid = try await currentUid()
 
         // Firestore 不支援 query「沒有某個欄位」,所以全 fetch 後逐筆檢查。
         // 只有 demo 階段資料量小可以這樣做。
