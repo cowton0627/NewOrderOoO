@@ -14,12 +14,117 @@ class MenuTableViewCell: UITableViewCell {
     @IBOutlet weak var pdPriceLabel: UILabel!
     @IBOutlet weak var pdContentLabel: UILabel!
     @IBOutlet weak var pdDescriptionLabel: UILabel!
-    
+
+    private let card = UIView()
+    private let thumb = UIImageView()
+    private let nameLabel = UILabel()
+    private let priceLabel = UILabel()
+    private let contentLabel = UILabel()
+    private let descriptionLabel = UILabel()
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        contentView.subviews.forEach { $0.removeFromSuperview() }
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
+        contentView.clipsToBounds = false
+        clipsToBounds = false
+
+        card.translatesAutoresizingMaskIntoConstraints = false
+        card.backgroundColor = .secondarySystemGroupedBackground
+        card.layer.cornerRadius = 18
+        card.layer.cornerCurve = .continuous
+        card.layer.shadowColor = UIColor.black.cgColor
+        card.layer.shadowOpacity = 0.06
+        card.layer.shadowRadius = 10
+        card.layer.shadowOffset = CGSize(width: 0, height: 4)
+        contentView.addSubview(card)
+
+        thumb.translatesAutoresizingMaskIntoConstraints = false
+        thumb.contentMode = .scaleAspectFill
+        thumb.layer.cornerRadius = 12
+        thumb.layer.cornerCurve = .continuous
+        thumb.layer.masksToBounds = true
+        thumb.backgroundColor = .tertiarySystemFill
+        card.addSubview(thumb)
+
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        nameLabel.font = .systemFont(ofSize: 17, weight: .semibold)
+        nameLabel.textColor = .label
+        nameLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        card.addSubview(nameLabel)
+
+        priceLabel.translatesAutoresizingMaskIntoConstraints = false
+        priceLabel.font = .monospacedDigitSystemFont(ofSize: 15, weight: .bold)
+        priceLabel.textColor = UIColor(named: "AccentColor") ?? .systemOrange
+        priceLabel.textAlignment = .right
+        priceLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        priceLabel.setContentHuggingPriority(.required, for: .horizontal)
+        card.addSubview(priceLabel)
+
+        contentLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentLabel.font = .systemFont(ofSize: 13, weight: .regular)
+        contentLabel.textColor = .secondaryLabel
+        card.addSubview(contentLabel)
+
+        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+        descriptionLabel.font = .systemFont(ofSize: 12, weight: .regular)
+        descriptionLabel.textColor = .tertiaryLabel
+        descriptionLabel.numberOfLines = 2
+        card.addSubview(descriptionLabel)
+
+        NSLayoutConstraint.activate([
+            card.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 6),
+            card.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -6),
+            card.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            card.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+
+            thumb.leadingAnchor.constraint(equalTo: card.leadingAnchor, constant: 10),
+            thumb.topAnchor.constraint(equalTo: card.topAnchor, constant: 10),
+            thumb.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -10),
+            thumb.widthAnchor.constraint(equalTo: thumb.heightAnchor),
+
+            nameLabel.topAnchor.constraint(equalTo: card.topAnchor, constant: 14),
+            nameLabel.leadingAnchor.constraint(equalTo: thumb.trailingAnchor, constant: 14),
+
+            priceLabel.firstBaselineAnchor.constraint(equalTo: nameLabel.firstBaselineAnchor),
+            priceLabel.leadingAnchor.constraint(greaterThanOrEqualTo: nameLabel.trailingAnchor, constant: 8),
+            priceLabel.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14),
+
+            contentLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 4),
+            contentLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
+            contentLabel.trailingAnchor.constraint(lessThanOrEqualTo: card.trailingAnchor, constant: -14),
+
+            descriptionLabel.topAnchor.constraint(equalTo: contentLabel.bottomAnchor, constant: 6),
+            descriptionLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
+            descriptionLabel.trailingAnchor.constraint(equalTo: card.trailingAnchor, constant: -14),
+        ])
+
+        let highlight = UIView()
+        highlight.backgroundColor = .clear
+        selectedBackgroundView = highlight
+    }
+
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+        super.setHighlighted(highlighted, animated: animated)
+        let scale: CGFloat = highlighted ? 0.97 : 1.0
+        UIView.animate(withDuration: 0.18, delay: 0, options: [.allowUserInteraction, .curveEaseOut]) {
+            self.card.transform = CGAffineTransform(scaleX: scale, y: scale)
+        }
+    }
+
+    func configure(with data: ProductData) {
+        thumb.image = UIImage(named: data.imgName)
+        nameLabel.text = data.name
+        priceLabel.text = data.price
+        contentLabel.text = data.content
+        descriptionLabel.text = data.description
+    }
 }
 
 class MenuTableViewController: UITableViewController {
     let contents = [
-        
+
         ProductData(imgName: "drink001.jpg", name: "拿鐵咖啡", price: "$45.00", content: "熱鮮奶、咖啡", description: "Caffè Latte就是所謂加了牛奶的咖啡，通常直接音譯為「拿鐵咖啡」甚至「拿鐵」或「那提」。"),
         ProductData(imgName: "drink002.jpg", name: "魔幻美人魚", price: "$105.00", content: "調味咖啡", description: "混合红色火龍果和芒果醬，撒上藍莓粉和鮮奶油，最後裝飾上巧克力魚尾，繽紛粉嫩的色調肯定是2020年夏季必喝飲品。"),
         ProductData(imgName: "drink003.jpg", name: "芋頭牛奶", price: "$65.00", content: "芋頭、牛奶", description: "嚴選新鮮大甲芋頭加上二砂， 純手工翻攪熬煮及悶煮將近1小時才能起鍋。"),
@@ -32,33 +137,37 @@ class MenuTableViewController: UITableViewController {
         ProductData(imgName: "drink010.jpg", name: "養樂多", price: "$15.00", content: "水、各種化學物質", description: "市面上充斥各種冒牌貨，內容物並無乳酸菌，不幫助消化，其實本家的也差不多啦！"),
         ProductData(imgName: "drink011.jpg", name: "桂圓茶", price: "$44.00", content: "水、桂圓", description: "用比桂圓重的水泡出來的桂圓茶，而且紅棗用完了所以半價，不建議女性直飲，燥熱。"),
         ProductData(imgName: "drink012.jpg", name: "薑母茶", price: "$88.00", content: "熱水、薑母片", description: "據說對禦寒有功效，如果喝完還是覺得冷，那是你體質差。"),
-        
+
     ]
-    
+
     struct cellKey {
         static let MenuTableViewCell = "MenuTableViewCell"
     }
-        
+
 //    var bd: Firestore!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
 //        bd = Firestore.firestore()
-        
+
+        tableView.separatorStyle = .none
+        tableView.backgroundColor = .systemGroupedBackground
+        tableView.rowHeight = 116
+        tableView.contentInset = UIEdgeInsets(top: 4, left: 0, bottom: 16, right: 0)
     }
 
     @IBSegueAction func dataPassed(_ coder: NSCoder) -> MenuDetailTableViewController? {
         guard let row = tableView.indexPathForSelectedRow?.row else { return nil }
 //        let productData = cellContents[row]
 //        return MenuDetailTableViewController(coder, productData: productData, bd)
-        
+
         let controller = MenuDetailTableViewController(coder: coder)
         controller?.productData = contents[row]
         return controller
     }
-    
-    
-    
+
+
+
     //以下設定tableviewcell
     override func numberOfSections(in tableView: UITableView) -> Int { 1 }
 
@@ -66,21 +175,8 @@ class MenuTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: cellKey.MenuTableViewCell, for: indexPath) as? MenuTableViewCell else { return UITableViewCell() }
-        let cellRow = contents[indexPath.row]
-        print(cellRow.name)
-        cell.pdImgView.image = UIImage(named: cellRow.imgName)
-        cell.pdNameLabel.text = cellRow.name
-        cell.pdPriceLabel.text = cellRow.price
-        cell.pdPriceLabel.textColor = #colorLiteral(red: 1, green: 0.7408380418, blue: 0, alpha: 1)
-        cell.pdContentLabel.text = cellRow.content
-        cell.pdDescriptionLabel.text = cellRow.description
-        
+        cell.configure(with: contents[indexPath.row])
         return cell
     }
-    
-//    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat { 125 }
-    
 
 }
-
-
