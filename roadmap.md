@@ -14,6 +14,9 @@
 - [x] 載入 / 空 / 錯誤狀態 UI(`StatusOverlayView`)
 - [x] 下單後 Receipt 確認頁
 - [x] 編輯訂單(規格 + 訂購人)
+- [x] App Icon (Three Pearls — 三顆 boba pearls 配蜂蜜金漸層)
+- [x] `.gitignore` (Xcode / Swift / SPM 標準)
+- [x] 單元測試:Mock + Money / 兩個 VM tests (Xcode test target 需手動加,詳 `NewOrderOoOTests/README.md`)
 
 ## Next(體驗)
 
@@ -33,12 +36,11 @@
 
 ## 工程 / 體質
 
-- [ ] 單元測試:`OrderRepository` 與 ViewModel 已注入式設計可 mock,但 0 個 test
 - [ ] Crashlytics / Analytics
 - [ ] CI/CD(GitHub Actions / Xcode Cloud)
 - [ ] Dark Mode 全頁驗證
-- [ ] `.gitignore`(目前沒設,`xcuserdata` 等容易被誤 track)
 - [ ] 把 hardcoded 的中文文案集中到 `Localizable.strings`
+- [ ] 補充更多測試:`FirestoreOrderRepository` 整合測試(用 Firebase Emulator)、UI test
 
 ## Maybe(構想)
 
