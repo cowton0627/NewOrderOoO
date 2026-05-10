@@ -138,12 +138,6 @@ class OrderDetailTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        if let data = NSDataAsset(name: "anime")?.data {
-            let cfData = data as CFData
-            CGAnimateImageDataWithBlock(cfData, nil) { (_, cgImage, _) in
-                self.animeImgView.image = UIImage(cgImage: cgImage)
-            }
-        }
 
         tableView.separatorStyle = .none
         tableView.backgroundColor = AppTheme.pageBackground
@@ -154,6 +148,22 @@ class OrderDetailTableViewController: UITableViewController {
         navigationItem.largeTitleDisplayMode = .always
 
         setupBannerHeader()
+
+        // GIF 動畫先設第一幀靜態圖再啟動動畫,避免 callback 在 outlet nil 時 crash
+        if let data = NSDataAsset(name: "anime")?.data {
+            let cfData = data as CFData
+            if let src = CGImageSourceCreateWithData(cfData, nil),
+               let cg = CGImageSourceCreateImageAtIndex(src, 0, nil) {
+                animeImgView?.image = UIImage(cgImage: cg)
+            }
+            CGAnimateImageDataWithBlock(cfData, nil) { [weak self] (_, cgImage, stop) in
+                guard let imgView = self?.animeImgView else {
+                    stop.pointee = true
+                    return
+                }
+                imgView.image = UIImage(cgImage: cgImage)
+            }
+        }
 
         db = Firestore.firestore()
         fetchData()

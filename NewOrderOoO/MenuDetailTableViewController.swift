@@ -140,7 +140,7 @@ class MenuDetailTableViewController: UITableViewController {
             heroThumb.topAnchor.constraint(equalTo: heroCard.topAnchor),
             heroThumb.leadingAnchor.constraint(equalTo: heroCard.leadingAnchor),
             heroThumb.trailingAnchor.constraint(equalTo: heroCard.trailingAnchor),
-            heroThumb.heightAnchor.constraint(equalToConstant: 180),
+            heroThumb.heightAnchor.constraint(equalToConstant: 240),
 
             infoStack.topAnchor.constraint(equalTo: heroThumb.bottomAnchor, constant: 16),
             infoStack.leadingAnchor.constraint(equalTo: heroCard.leadingAnchor, constant: 16),
@@ -300,6 +300,20 @@ class MenuDetailTableViewController: UITableViewController {
                 card.topAnchor.constraint(equalTo: cell.contentView.topAnchor, constant: 4),
                 card.bottomAnchor.constraint(equalTo: cell.contentView.bottomAnchor, constant: -4),
             ])
+
+            // storyboard 元件用 contentView 16pt margin,加進 card 後會貼齊 card 邊。
+            // 動態把 leading 16 → 32、trailingMargin 8 → 16,讓元件相對 card 內縮 16pt。
+            for c in cell.contentView.constraints {
+                if (c.firstItem as? UIView)?.tag == cardTag { continue }
+                if (c.secondItem as? UIView)?.tag == cardTag { continue }
+
+                if c.firstAttribute == .leading, c.secondAttribute == .leading, c.constant == 16 {
+                    c.constant = 32
+                }
+                if c.firstAttribute == .trailingMargin, c.secondAttribute == .trailing, c.constant == 8 {
+                    c.constant = 16
+                }
+            }
         }
     }
 
