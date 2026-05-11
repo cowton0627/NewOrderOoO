@@ -100,7 +100,7 @@ Collection：`orderList`
 
 1. 建立 Firebase project。
 2. 在 Firebase Console 啟用 Authentication 的 Anonymous sign-in。
-3. 下載 `GoogleService-Info.plist`，放到 `NewOrderOoO/` 目錄。
+3. 下載 `GoogleService-Info.plist`，放到 `NewOrderOoO/` 目錄。這個檔案包含本機 Firebase 專案設定，已列入 `.gitignore`，不要 commit 到 repo。
 4. 部署 Firestore rules：
 
 ```bash
@@ -151,7 +151,3 @@ open NewOrderOoO.xcodeproj
 - Crashlytics / Analytics。
 - CI/CD。
 - UI test 與 Firestore emulator 整合測試。
-
-## License
-
-MIT

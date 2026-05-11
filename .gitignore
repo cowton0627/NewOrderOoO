@@ -19,6 +19,9 @@ DerivedData/
 # 注意:**不要** ignore Package.resolved。
 # app 專案要把 lockfile commit 進去確保所有人裝同版套件。
 
+# Firebase local project config
+NewOrderOoO/GoogleService-Info.plist
+
 # CocoaPods (這個專案沒用,但加上以防萬一)
 Pods/
 

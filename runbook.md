@@ -6,7 +6,7 @@
 
 1. 到 [Firebase Console](https://console.firebase.google.com) 建專案
 2. 加 iOS app(Bundle ID 必須跟 Xcode 一致:`ClcStudio.NewOrderOoO`)
-3. 下載 `GoogleService-Info.plist`,放到 `NewOrderOoO/` 底下(同 `AppDelegate.swift` 那層)
+3. 下載 `GoogleService-Info.plist`,放到 `NewOrderOoO/` 底下(同 `AppDelegate.swift` 那層)。這是本機 Firebase 設定檔,不要 commit 到 repo
 4. 在 console 啟用:
    - **Authentication > Sign-in method > Anonymous** (打開 Enable)
    - **Firestore Database > Create database**(選 production mode)
