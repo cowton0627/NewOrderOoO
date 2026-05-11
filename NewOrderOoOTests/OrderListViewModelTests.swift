@@ -37,7 +37,7 @@ final class OrderListViewModelTests: XCTestCase {
         repo.stubFetchOrders = []
         try await sut.load()
         XCTAssertEqual(sut.numberOfOrders, 0)
-        XCTAssertTrue(repo.migrateCalled, "load 應該先觸發 migration")
+        XCTAssertFalse(repo.migrateCalled, "public portfolio build should not run legacy ownership migration")
     }
 
     func testLoadWithOrders() async throws {

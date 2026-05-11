@@ -81,7 +81,6 @@ final class OrderListViewModel {
     func order(at index: Int) -> OrderData { orders[index] }
 
     func load() async throws {
-        try? await repository.migrateLegacyOrdersIfNeeded()
         orders = try await repository.fetchOrders()
     }
 

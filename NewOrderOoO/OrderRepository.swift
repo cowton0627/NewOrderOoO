@@ -8,6 +8,7 @@
 
 import Foundation
 import FirebaseAuth
+import FirebaseCore
 import FirebaseFirestore
 
 protocol OrderRepository {
@@ -21,12 +22,15 @@ protocol OrderRepository {
 
 enum RepositoryError: LocalizedError {
     case notAuthenticated
+    case firebaseNotConfigured
     case signInFailed(underlying: Error)
 
     var errorDescription: String? {
         switch self {
         case .notAuthenticated:
             return "尚未登入,請稍後再試"
+        case .firebaseNotConfigured:
+            return "尚未設定 Firebase。請將 GoogleService-Info.plist 放到 NewOrderOoO/ 目錄後再使用訂單功能。"
         case .signInFailed(let underlying):
             return "登入失敗:\(underlying.localizedDescription)。\n請確認 Firebase Console > Authentication > Sign-in method 已啟用 Anonymous。"
         }
@@ -34,17 +38,26 @@ enum RepositoryError: LocalizedError {
 }
 
 final class FirestoreOrderRepository: OrderRepository {
-    private let db: Firestore
+    private var db: Firestore?
     private let collectionName: String
 
-    init(db: Firestore = .firestore(), collectionName: String = "orderList") {
+    init(db: Firestore? = nil, collectionName: String = "orderList") {
         self.db = db
         self.collectionName = collectionName
+    }
+
+    private func firestore() throws -> Firestore {
+        if let db = db { return db }
+        guard FirebaseApp.app() != nil else { throw RepositoryError.firebaseNotConfigured }
+        let db = Firestore.firestore()
+        self.db = db
+        return db
     }
 
     /// 拿 uid:已登入直接回,沒登入主動觸發 anonymous sign-in 並等它完成。
     /// 比 sync 版穩,即使 AppDelegate 的 anonymous sign-in 還沒完成也能擋住。
     private func currentUid() async throws -> String {
+        guard FirebaseApp.app() != nil else { throw RepositoryError.firebaseNotConfigured }
         if let uid = Auth.auth().currentUser?.uid { return uid }
         do {
             let result = try await Auth.auth().signInAnonymously()
@@ -56,6 +69,7 @@ final class FirestoreOrderRepository: OrderRepository {
 
     func placeOrder(_ input: OrderInput) async throws -> String {
         let uid = try await currentUid()
+        let db = try firestore()
         let data: [String: Any] = [
             "orderName": input.orderName,
             "drinkName": input.drinkName,
@@ -72,6 +86,7 @@ final class FirestoreOrderRepository: OrderRepository {
 
     func fetchOrders() async throws -> [OrderData] {
         let uid = try await currentUid()
+        let db = try firestore()
         let snapshot = try await db.collection(collectionName)
             .whereField("uid", isEqualTo: uid)
             .getDocuments()
@@ -80,11 +95,13 @@ final class FirestoreOrderRepository: OrderRepository {
 
     func deleteOrder(id: String) async throws {
         _ = try await currentUid()
+        let db = try firestore()
         try await db.collection(collectionName).document(id).delete()
     }
 
     func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn) async throws {
         _ = try await currentUid()
+        let db = try firestore()
         try await db.collection(collectionName).document(id).updateData([
             "orderName": orderName,
             "drinkSize": size.rawValue,
@@ -96,16 +113,7 @@ final class FirestoreOrderRepository: OrderRepository {
 
     /// Demo-only:把所有 uid 不是當前 user 的訂單接管過來。
     /// 場景:simulator 重新安裝後 anonymous uid 換了,舊資料卡在前一個 uid。
-    /// 單用戶 demo 可接受;production / multi-user 必須關掉。
+    /// 保留方法只為了舊測試/協定相容;公開 portfolio 預設不再呼叫。
     func migrateLegacyOrdersIfNeeded() async throws {
-        let uid = try await currentUid()
-
-        let snapshot = try await db.collection(collectionName).getDocuments()
-        for doc in snapshot.documents {
-            let existingUid = doc.data()["uid"] as? String
-            if existingUid != uid {
-                try? await doc.reference.updateData(["uid": uid])
-            }
-        }
     }
 }

@@ -16,10 +16,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        FirebaseApp.configure()
+        if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist"),
+           let options = FirebaseOptions(contentsOfFile: path) {
+            FirebaseApp.configure(options: options)
+        } else {
+            print("Firebase config not found. Order features are disabled until GoogleService-Info.plist is added locally.")
+        }
 
         // 匿名登入,讓 Firestore Security Rules 能 scope 到單一使用者
-        if Auth.auth().currentUser == nil {
+        if FirebaseApp.app() != nil, Auth.auth().currentUser == nil {
             Auth.auth().signInAnonymously { _, error in
                 if let error = error { print("anonymous sign-in failed: \(error)") }
             }
@@ -63,4 +68,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
 
 }
-

@@ -2,6 +2,12 @@
 
 NewOrderOoO 是一個 iOS 飲料訂購 demo app，使用 Swift / UIKit 實作，搭配 Firebase Anonymous Auth 與 Cloud Firestore 儲存訂單資料。專案重點是把早期 storyboard 型 app 整理成較清楚的 MVVM + Repository 架構，並補上卡片式 UI、訂單確認頁、編輯訂單與基礎單元測試。
 
+## Portfolio Notice
+
+這個 repository 是個人履歷與作品集展示用。程式碼可公開閱讀，但 repo 不包含真實 Firebase 設定檔，也沒有授權第三方重用圖片、GIF 或其他素材。
+
+clone 後即使沒有 `GoogleService-Info.plist` 也可以 build 並開啟 app 查看商品列表與 UI；下單、訂單列表、編輯與刪除等 Firebase 功能需要自行建立 Firebase project，並在本機加入 `NewOrderOoO/GoogleService-Info.plist`。
+
 ## 功能
 
 - 商品列表：顯示 12 款飲料、商品圖片、品名、描述與價格。
@@ -100,7 +106,7 @@ Collection：`orderList`
 
 1. 建立 Firebase project。
 2. 在 Firebase Console 啟用 Authentication 的 Anonymous sign-in。
-3. 下載 `GoogleService-Info.plist`，放到 `NewOrderOoO/` 目錄。這個檔案包含本機 Firebase 專案設定，已列入 `.gitignore`，不要 commit 到 repo。
+3. 下載 `GoogleService-Info.plist`，放到 `NewOrderOoO/` 目錄。這個檔案包含本機 Firebase 專案設定，已列入 `.gitignore`，不要 commit 到 repo。build 時專案會自動把本機 plist 複製進 app bundle。
 4. 部署 Firestore rules：
 
 ```bash
@@ -139,7 +145,7 @@ open NewOrderOoO.xcodeproj
 - 商品資料目前寫死在 `ProductCatalog`，尚未改成從 Firestore 載入。
 - 訂單目前只儲存總價，沒有保存 quantity 與 unit price。
 - Anonymous Auth 適合 demo；正式產品應支援 Apple / Google 登入與帳號資料轉移。
-- Firestore migration helper 僅適合單使用者 demo，不應直接用在正式多人環境。
+- 舊資料 migration helper 已從預設載入流程移除，避免公開 demo 接管其他使用者資料。
 
 ## Roadmap
 

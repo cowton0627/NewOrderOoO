@@ -16,7 +16,6 @@
 		2938639326C92A780010E2A5 /* MenuDetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2938639226C92A780010E2A5 /* MenuDetailTableViewController.swift */; };
 		2938639526C92A8D0010E2A5 /* OrderDetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2938639426C92A8D0010E2A5 /* OrderDetailTableViewController.swift */; };
 		2938639726C92A9C0010E2A5 /* ProductData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2938639626C92A9C0010E2A5 /* ProductData.swift */; };
-		2938639A26C97AEB0010E2A5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2938639926C97AEA0010E2A5 /* GoogleService-Info.plist */; };
 		2938639D26C97C210010E2A5 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 2938639C26C97C210010E2A5 /* FirebaseAuth */; };
 		2938639F26C97C210010E2A5 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 2938639E26C97C210010E2A5 /* FirebaseStorage */; };
 		293863A126C97C210010E2A5 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 293863A026C97C210010E2A5 /* FirebaseFirestore */; };
@@ -42,7 +41,6 @@
 		2938639226C92A780010E2A5 /* MenuDetailTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuDetailTableViewController.swift; sourceTree = "<group>"; };
 		2938639426C92A8D0010E2A5 /* OrderDetailTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderDetailTableViewController.swift; sourceTree = "<group>"; };
 		2938639626C92A9C0010E2A5 /* ProductData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductData.swift; sourceTree = "<group>"; };
-		2938639926C97AEA0010E2A5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		293863A226CA5D6D0010E2A5 /* OrderData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrderData.swift; sourceTree = "<group>"; };
 		293863A626CBABCD0010E2A5 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		293863A826CBABDE0010E2A5 /* DomainModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainModels.swift; sourceTree = "<group>"; };
@@ -96,7 +94,6 @@
 				2938638526C9264F0010E2A5 /* Assets.xcassets */,
 				2938638726C9264F0010E2A5 /* LaunchScreen.storyboard */,
 				2938638A26C9264F0010E2A5 /* Info.plist */,
-				2938639926C97AEA0010E2A5 /* GoogleService-Info.plist */,
 			);
 			path = NewOrderOoO;
 			sourceTree = "<group>";
@@ -127,6 +124,7 @@
 				2938637526C926490010E2A5 /* Sources */,
 				2938637626C926490010E2A5 /* Frameworks */,
 				2938637726C926490010E2A5 /* Resources */,
+				7E3489202C1EA00000000001 /* Copy local Firebase config if present */,
 			);
 			buildRules = (
 			);
@@ -183,13 +181,34 @@
 			buildActionMask = 2147483647;
 			files = (
 				2938638926C9264F0010E2A5 /* LaunchScreen.storyboard in Resources */,
-				2938639A26C97AEB0010E2A5 /* GoogleService-Info.plist in Resources */,
 				2938638626C9264F0010E2A5 /* Assets.xcassets in Resources */,
 				2938638426C926490010E2A5 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		7E3489202C1EA00000000001 /* Copy local Firebase config if present */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy local Firebase config if present";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ -f \"${SRCROOT}/NewOrderOoO/GoogleService-Info.plist\" ]; then\n  cp \"${SRCROOT}/NewOrderOoO/GoogleService-Info.plist\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		2938637526C926490010E2A5 /* Sources */ = {
