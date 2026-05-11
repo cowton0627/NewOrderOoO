@@ -85,3 +85,23 @@
 - **症狀**:diagnostics 區一直紅字 `No such module 'UIKit'` / `No such module 'FirebaseAuth'`,但 `xcodebuild` 跑得過
 - **根因**:SourceKit / IDE index 跟 SPM 解析有時間差,`/tmp/NewOrderOoO-build` 跟 Xcode 預設 DerivedData 路徑不同也會誤導
 - **解**:忽略,只看 `xcodebuild` 的 `** BUILD SUCCEEDED **`;Xcode 重啟一次 index 會 catch up
+
+## Build 一直跳「Missing package product 'FirebaseFirestoreSwift-Beta'」清快取也沒用
+
+- **症狀**:Xcode 跳 `Missing package product 'FirebaseFirestoreSwift-Beta'` / `'FirebaseStorageSwift-Beta'`。清 DerivedData、Xcode `Cache.db`、SPM `repositories` cache、`ModuleCache.noindex` 通通試過,重開 Xcode 還是錯;但命令列 `xcodebuild` 卻能 build 過
+- **根因**:系統上有多份同名專案(`~/Desktop/NewOrderOoO`、`~/Downloads/NewOrderOoO-main`、`~/Library/Mobile Documents/.../NewOrderOoO`),Xcode UI 從 recent 或雙擊開到的是某份 Firebase 10 時代的舊 pbxproj(真的還有 `Swift-Beta` 引用),不是我們在維護的 Desktop 那份。命令列 `xcodebuild -project NewOrderOoO.xcodeproj` 在 Desktop dir 跑,讀的才是對的那份,所以過
+- **線索**:DerivedData 資料夾名稱裡的 hash 是用「專案絕對路徑」算出來的。看到兩個 `<Project>-<hash>` 但 hash 不同 → 就是兩條路徑各自被 Xcode 開過。每個 DerivedData 的 `info.plist` 有 `WorkspacePath` 欄位,直接看就知道對應哪份專案:
+  ```bash
+  for dd in ~/Library/Developer/Xcode/DerivedData/<Project>-*; do
+    plutil -extract WorkspacePath raw "$dd/info.plist"
+  done
+  ```
+- **解**:在 Xcode 內 `File → Close Project` 關錯的那份,從 Finder 雙擊正確路徑的 `.xcodeproj`(或 `xed <絕對路徑>`)。確認 Xcode 標題列的路徑指到對的位置
+- **預防**:同名專案的舊副本(GitHub 下載 ZIP、雲端備份)用完就刪,不要留在 `~/Downloads` 等容易被 macOS Spotlight / Xcode recent 索引到的地方
+
+## Xcode 自動把 `DEVELOPMENT_TEAM` 加回 pbxproj
+
+- **症狀**:已經把 `DEVELOPMENT_TEAM = <team_id>;` 從 pbxproj 拿掉、push 上 GitHub 之後,本機開 Xcode 一次,`git diff` 又看到 Team ID 跑回來。同時 `objectVersion` 可能也被升(如 52 → 54)
+- **根因**:Code Signing Style 是 `Automatic`,Xcode 一打開專案就根據本機登入的 Apple ID 自動補 Team ID 進 target build settings(讓 signing 確保有 team 可用)
+- **解**:target build settings 把 `CODE_SIGN_STYLE` 改成 `Manual`。Simulator build 不需要 Team(走 "Sign to Run Locally"),Manual 完全 OK;只有 build 到實機才需要,屆時臨時切回 Automatic + 選自己 team,build 完改回 Manual,別把 Team ID commit 進 git
+- **連帶**:Xcode UI 的 Signing & Capabilities 分頁可能顯示 "Signing for "NewOrderOoO" requires a development team" 警告;Simulator build 可以忽略
