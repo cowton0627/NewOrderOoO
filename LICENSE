@@ -1,0 +1,58 @@
+NewOrderOoO License
+
+Copyright (c) 2026 Charles Cheng (cowton0627)
+
+================================================================
+Source Code
+================================================================
+
+The source code of this repository — including but not limited to Swift
+source files (*.swift), Firestore security rules (firestore.rules), example
+configuration files (*.example.plist), Xcode project files, build scripts,
+and documentation in Markdown (*.md) — is licensed under the MIT License:
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject
+  to the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+================================================================
+Assets (NOT covered by MIT)
+================================================================
+
+All non-code assets contained in this repository — including but not
+limited to images, photographs, illustrations, GIFs, animations, icons,
+the App Icon ("Three Pearls"), and any files located under
+`NewOrderOoO/Assets.xcassets/` — are NOT licensed under the MIT terms
+above.
+
+All rights to the Assets are reserved by the copyright holder. You may
+view them as part of this portfolio repository, but you may NOT copy,
+modify, redistribute, sublicense, or use the Assets in any other project,
+commercial or non-commercial, without prior written permission from the
+copyright holder.
+
+This repository is published for portfolio, code-review, and educational
+demonstration purposes.
+
+================================================================
+Third-Party Components
+================================================================
+
+This project depends on third-party libraries (Firebase iOS SDK and its
+transitive dependencies) that are governed by their own licenses.
+See THIRD_PARTY_LICENSES.md.

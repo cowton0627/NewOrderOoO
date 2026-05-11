@@ -4,9 +4,9 @@ NewOrderOoO 是一個 iOS 飲料訂購 demo app，使用 Swift / UIKit 實作，
 
 ## Portfolio Notice
 
-這個 repository 是個人履歷與作品集展示用。程式碼可公開閱讀，但 repo 不包含真實 Firebase 設定檔，也沒有授權第三方重用圖片、GIF 或其他素材。
+這個 repository 是個人履歷與作品集展示用。**原始碼**以 MIT 授權釋出 (見 [LICENSE](LICENSE))；**圖片、GIF、App Icon 等素材**保留所有權利,不授權第三方重用。隱私說明見 [PRIVACY.md](PRIVACY.md),第三方授權見 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)。
 
-clone 後即使沒有 `GoogleService-Info.plist` 也可以 build 並開啟 app 查看商品列表與 UI；下單、訂單列表、編輯與刪除等 Firebase 功能需要自行建立 Firebase project，並在本機加入 `NewOrderOoO/GoogleService-Info.plist`。
+Repo 不包含真實 Firebase 設定檔。clone 後即使沒有 `GoogleService-Info.plist` 也可以 build 並開啟 app 查看商品列表與 UI；下單、訂單列表、編輯與刪除等 Firebase 功能需要自行建立 Firebase project,並在本機加入 `NewOrderOoO/GoogleService-Info.plist` (可從 `GoogleService-Info.example.plist` 複製改名後填入自己的值)。
 
 ## 功能
 
@@ -157,3 +157,10 @@ open NewOrderOoO.xcodeproj
 - Crashlytics / Analytics。
 - CI/CD。
 - UI test 與 Firestore emulator 整合測試。
+
+## 授權與隱私
+
+- 程式碼授權:[LICENSE](LICENSE) (MIT)
+- 素材 (圖片 / GIF / App Icon):保留所有權利,不授權重用
+- 隱私說明:[PRIVACY.md](PRIVACY.md)
+- 第三方套件授權:[THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)
