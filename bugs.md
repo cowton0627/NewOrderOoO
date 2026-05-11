@@ -71,6 +71,7 @@
 - **根因**:舊 Firestore 文件沒 `uid` 欄位(後來才加的),`whereField("uid", isEqualTo: uid)` 自然查不到
 - **解**:加 `migrateLegacyOrdersIfNeeded()`,進訂單頁時(VM.load 開頭)全 fetch 後對沒 uid 的文件 `updateData(["uid": currentUid])`,並用 UserDefaults flag 確保只跑一次
 - **連帶**:如果已 deploy security rules 把寫入限 owner-only,migration 會被擋。要先暫時放寬 rules 或在 console 手動補欄位
+- **後續(公開 portfolio 版)**:為避免公開 demo 把陌生 uid 的舊資料拉進自己帳號,`migrateLegacyOrdersIfNeeded` 已從 `VM.load` 移除,`FirestoreOrderRepository` 改空 no-op;Mock 與 protocol 留著只為了測試相容,`OrderListViewModelTests` 反過來驗它不被呼叫
 
 ## 「載入失敗:尚未登入,請稍後再試」
 

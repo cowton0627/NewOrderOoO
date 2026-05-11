@@ -27,7 +27,7 @@
 
 - **MoneyTests** — Decimal 精度、parse 各種格式、`*` 運算、ISO / storage 字串
 - **MenuDetailViewModelTests** — 價格計算、`OrderError.missingName / .invalidPrice`、空白姓名 trimming、repository 錯誤傳遞
-- **OrderListViewModelTests** — load 觸發 migration、delete optimistic、avatar 穩定性
+- **OrderListViewModelTests** — load **不**觸發 migration(公開 demo 設計)、delete optimistic、avatar 穩定性
 
 ## 未涵蓋(可後續補)
 
