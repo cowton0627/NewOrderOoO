@@ -17,7 +17,6 @@
 		2938639526C92A8D0010E2A5 /* OrderDetailTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2938639426C92A8D0010E2A5 /* OrderDetailTableViewController.swift */; };
 		2938639726C92A9C0010E2A5 /* ProductData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2938639626C92A9C0010E2A5 /* ProductData.swift */; };
 		2938639D26C97C210010E2A5 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 2938639C26C97C210010E2A5 /* FirebaseAuth */; };
-		2938639F26C97C210010E2A5 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 2938639E26C97C210010E2A5 /* FirebaseStorage */; };
 		293863A126C97C210010E2A5 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 293863A026C97C210010E2A5 /* FirebaseFirestore */; };
 		293863A326CA5D6D0010E2A5 /* OrderData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293863A226CA5D6D0010E2A5 /* OrderData.swift */; };
 		293863A726CBABCD0010E2A5 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 293863A626CBABCD0010E2A5 /* AppTheme.swift */; };
@@ -58,7 +57,6 @@
 			files = (
 				293863A126C97C210010E2A5 /* FirebaseFirestore in Frameworks */,
 				2938639D26C97C210010E2A5 /* FirebaseAuth in Frameworks */,
-				2938639F26C97C210010E2A5 /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -133,7 +131,6 @@
 			name = NewOrderOoO;
 			packageProductDependencies = (
 				2938639C26C97C210010E2A5 /* FirebaseAuth */,
-				2938639E26C97C210010E2A5 /* FirebaseStorage */,
 				293863A026C97C210010E2A5 /* FirebaseFirestore */,
 			);
 			productName = NewOrderOoO;
@@ -445,11 +442,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2938639B26C97C210010E2A5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
-		};
-		2938639E26C97C210010E2A5 /* FirebaseStorage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2938639B26C97C210010E2A5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseStorage;
 		};
 		293863A026C97C210010E2A5 /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;

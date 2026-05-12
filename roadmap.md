@@ -18,6 +18,15 @@
 - [x] `.gitignore` (Xcode / Swift / SPM 標準)
 - [x] 單元測試:Mock + Money / 兩個 VM tests (Xcode test target 需手動加,詳 `NewOrderOoOTests/README.md`)
 
+### 公開前處理(portfolio release prep)
+
+- [x] `LICENSE` (MIT for code, assets 保留所有權利)、`PRIVACY.md`、`THIRD_PARTY_LICENSES.md`
+- [x] 移除 `DEVELOPMENT_TEAM`,`CODE_SIGN_STYLE` 改 `Manual`,避免 Xcode 重新 inject 個人 Apple Team ID
+- [x] Git history rewrite:統一 author 為 `cowton0627 <83654992+cowton0627@users.noreply.github.com>`,工作信箱不留歷史
+- [x] 清掉同名專案的舊副本(Downloads ZIP / iCloud),避免 Xcode 開錯版本
+- [x] `migrateLegacyOrdersIfNeeded` 從預設流程移除(改 no-op + 測試反向驗證),避免公開 demo 接管別人 uid 的舊資料
+- [x] 移除 unused `FirebaseStorage` SPM 依賴
+
 ## Next(體驗)
 
 - [ ] 購物車(一次下多杯不同規格)

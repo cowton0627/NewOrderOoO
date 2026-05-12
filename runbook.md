@@ -83,17 +83,27 @@ stack trace 在 `threads[].frames[]` 裡,看 `sourceFile` 跟 `symbol`。
 
 ## 出怪事(build 過但 UI / SPM 行為怪)時的清快取流程
 
+由溫和到激進,逐步試,不一定要每條都跑:
+
 ```bash
 # 關 Xcode 後再跑
 rm -rf ~/Library/Developer/Xcode/DerivedData/NewOrderOoO-*
 rm -rf NewOrderOoO.xcodeproj/xcuserdata
+
+# ⚠️ 下面這條會讓 git working tree 變 dirty,因為 Package.resolved 是 tracked。
+# 只有 DerivedData / xcuserdata 都清完還是不對才動它;清完 Xcode 會重新解出新版本,
+# 內容通常一樣只是時戳變,確認沒問題後可以 `git checkout -- ...Package.resolved` 還原。
 rm -f NewOrderOoO.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 open NewOrderOoO.xcodeproj
 # 等左上角 SPM 解析完,⌘+Shift+K Clean,⌘+R 重跑
 ```
 
+更深層的快取(`~/Library/Caches/com.apple.dt.Xcode/Cache.db*`、`~/Library/Caches/org.swift.swiftpm/repositories`、`~/Library/Developer/Xcode/DerivedData/ModuleCache.noindex`)只有在前面都試過還不對才清;會 force re-download 所有 SPM 套件,慢。
+
 如果 Firebase SDK 也要清:`File → Packages → Reset Package Caches`(在 Xcode UI)。
+
+> 注意:如果錯誤是 `Missing package product 'FirebaseFirestoreSwift-Beta'` 之類已過期的 product,**先檢查 Xcode 開的是不是這份專案**,不是清快取問題。詳 `bugs.md`「Build 一直跳 Missing package product 清快取也沒用」。
 
 ## Firestore 看資料
 
@@ -123,7 +133,17 @@ open NewOrderOoO.xcodeproj
 
 ## 部署到實機
 
-不在 runbook 範圍(目前還是 dev demo)。要簽證書 + provisioning profile,用 Xcode 自動 signing 即可。
+不在 runbook 主要範圍(目前還是 dev demo)。signing 預設是 `Manual`,Simulator build 不需要 Team。
+
+要 build 到實機時臨時切換:
+
+1. Xcode → Target → **Signing & Capabilities** → 把 **Automatically manage signing** 打勾(等同 `CODE_SIGN_STYLE = Automatic`)
+2. 選自己的 **Team**(Xcode 會把 `DEVELOPMENT_TEAM` 寫進 pbxproj)
+3. ⌘+R build 到實機
+4. **build 完務必把 signing 改回 Manual**(取消 Automatically manage signing 的勾)
+5. **`git diff` 檢查 pbxproj 沒有殘留 `DEVELOPMENT_TEAM = ...;` 才能 commit**;Team ID 是個人 Apple Developer 識別碼,不該進公開 portfolio repo
+
+詳 `bugs.md`「Xcode 自動把 DEVELOPMENT_TEAM 加回 pbxproj」。
 
 ## 常用 git 動作
 

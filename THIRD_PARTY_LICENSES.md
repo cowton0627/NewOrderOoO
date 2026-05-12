@@ -16,7 +16,6 @@ NewOrderOoO 透過 Swift Package Manager 引入 Firebase iOS SDK,以下是直接
 - 本專案使用的子 module:
   - `FirebaseAuth` (Anonymous sign-in)
   - `FirebaseFirestore`
-  - `FirebaseStorage` (linked but currently unused)
 
 完整授權:https://github.com/firebase/firebase-ios-sdk/blob/main/LICENSE
 
