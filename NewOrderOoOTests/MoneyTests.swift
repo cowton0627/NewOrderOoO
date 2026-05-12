@@ -48,6 +48,14 @@ final class MoneyTests: XCTestCase {
         XCTAssertEqual(Money(amount: 90).formattedISO(), "TWD 90")
     }
 
+    /// Regression:`.currencyISOCode` 預設 minimumFractionDigits = 2;
+    /// 用 `Decimal(string: "50.00")`(parse 來的)formatter 會保留 ".00",
+    /// 必須顯式設 `minimumFractionDigits = 0` 才會顯示 "TWD 50"。
+    func testFormattedISOStripsTrailingZerosFromParsedDecimal() {
+        let m = Money(amount: Decimal(string: "50.00")!)
+        XCTAssertEqual(m.formattedISO(), "TWD 50")
+    }
+
     func testStorageString() {
         XCTAssertEqual(Money(amount: 45).storageString(), "$45.00")
     }

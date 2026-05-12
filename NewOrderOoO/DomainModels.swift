@@ -38,12 +38,16 @@ struct Money: Equatable {
     }
 
     /// 給總額顯示用:"TWD 90"。
+    /// 自己 prepend currency code,formatter 只負責純數字格式(避免 `.currencyISOCode`
+    /// 在不同 iOS 版本 / locale 下排版不一致,例如 "TWD$50.00" / "TWD 50.00" 等)。
     func formattedISO() -> String {
         let f = NumberFormatter()
-        f.locale = Locale(identifier: "zh_TW")
-        f.numberStyle = .currencyISOCode
+        f.numberStyle = .decimal
+        f.minimumFractionDigits = 0
         f.maximumFractionDigits = 0
-        return f.string(from: amount as NSDecimalNumber) ?? "\(currencyCode) \(amount)"
+        f.usesGroupingSeparator = false
+        let formatted = f.string(from: amount as NSDecimalNumber) ?? "\(amount)"
+        return "\(currencyCode) \(formatted)"
     }
 
     /// 寫入 Firestore 用的字串格式,維持與舊資料相容("$45.00")。
