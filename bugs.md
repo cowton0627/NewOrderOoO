@@ -105,3 +105,10 @@
 - **根因**:Code Signing Style 是 `Automatic`,Xcode 一打開專案就根據本機登入的 Apple ID 自動補 Team ID 進 target build settings(讓 signing 確保有 team 可用)
 - **解**:target build settings 把 `CODE_SIGN_STYLE` 改成 `Manual`。Simulator build 不需要 Team(走 "Sign to Run Locally"),Manual 完全 OK;只有 build 到實機才需要,屆時臨時切回 Automatic + 選自己 team,build 完改回 Manual,別把 Team ID commit 進 git
 - **連帶**:Xcode UI 的 Signing & Capabilities 分頁可能顯示 "Signing for "NewOrderOoO" requires a development team" 警告;Simulator build 可以忽略
+
+## Manual signing 設一半 → 「requires a provisioning profile」
+
+- **症狀**:Xcode 跳 `"NewOrderOoO" requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor.`,連 Simulator build 都跑不起來
+- **根因**:pbxproj 在「半邊改、半邊沒改」的狀態 — `CODE_SIGN_STYLE = Automatic` 但 `CODE_SIGN_IDENTITY = "Apple Development"` 且 `PROVISIONING_PROFILE_SPECIFIER = ""`(空字串)。Xcode 試圖 auto-resolve profile 但 specifier 是空的,UI 嚴格驗證直接報錯
+- **解**:鎖死成 Simulator 友善設定:`CODE_SIGN_STYLE = Manual` + `CODE_SIGN_IDENTITY = "-"`(代表 "Sign to Run Locally",不需 team、不需 profile)。Debug 跟 Release 都要設
+- **連帶**:實機 build 不會過(沒 profile)。要 build 到實機臨時切回 Automatic + 選 team,build 完務必改回 Manual + `"-"` 並 `git diff` 確認 Team ID 沒留下
