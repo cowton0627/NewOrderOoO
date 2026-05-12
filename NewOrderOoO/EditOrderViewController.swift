@@ -23,6 +23,10 @@ final class EditOrderViewController: UIViewController {
     private let addSegment = UISegmentedControl(items: AddOn.allCases.map { $0.displayName })
     private let saveButton = UIButton(type: .system)
 
+    /// saveButton 的 bottom constraint;鍵盤升起時往上推。
+    private var saveButtonBottomConstraint: NSLayoutConstraint?
+    private let saveButtonBaseBottom: CGFloat = -16
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "編輯訂單"
@@ -30,6 +34,41 @@ final class EditOrderViewController: UIViewController {
 
         setupUI()
         prefill()
+
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(keyboardWillChange(_:)),
+            name: UIResponder.keyboardWillChangeFrameNotification, object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(keyboardWillHide(_:)),
+            name: UIResponder.keyboardWillHideNotification, object: nil
+        )
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
+    @objc private func keyboardWillChange(_ note: Notification) {
+        guard let frame = (note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue,
+              let duration = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+        let overlap = max(0, view.bounds.height - frame.minY - view.safeAreaInsets.bottom)
+        saveButtonBottomConstraint?.constant = saveButtonBaseBottom - overlap
+        UIView.animate(withDuration: duration) { self.view.layoutIfNeeded() }
+    }
+
+    @objc private func keyboardWillHide(_ note: Notification) {
+        let duration = (note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double) ?? 0.25
+        saveButtonBottomConstraint?.constant = saveButtonBaseBottom
+        UIView.animate(withDuration: duration) { self.view.layoutIfNeeded() }
     }
 
     private func prefill() {
@@ -58,6 +97,8 @@ final class EditOrderViewController: UIViewController {
         let leftPad = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 0))
         nameField.leftView = leftPad
         nameField.leftViewMode = .always
+        nameField.returnKeyType = .done
+        nameField.delegate = self
 
         drinkLabel.font = AppTheme.Font.detailTitle
         drinkLabel.textColor = AppTheme.primaryText
@@ -86,6 +127,7 @@ final class EditOrderViewController: UIViewController {
         saveButton.translatesAutoresizingMaskIntoConstraints = false
 
         let safe = view.safeAreaLayoutGuide
+        let saveBottom = saveButton.bottomAnchor.constraint(equalTo: safe.bottomAnchor, constant: saveButtonBaseBottom)
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: safe.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -106,10 +148,11 @@ final class EditOrderViewController: UIViewController {
             saveButton.leadingAnchor.constraint(equalTo: safe.leadingAnchor, constant: 16),
             saveButton.trailingAnchor.constraint(equalTo: safe.trailingAnchor, constant: -16),
             saveButton.heightAnchor.constraint(equalToConstant: 56),
-            saveButton.bottomAnchor.constraint(equalTo: safe.bottomAnchor, constant: -16),
+            saveBottom,
         ])
+        saveButtonBottomConstraint = saveBottom
 
-        nameField.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        nameField.heightAnchor.constraint(equalToConstant: 48).isActive = true
     }
 
     private func makeFormStack() -> UIStackView {
@@ -155,6 +198,7 @@ final class EditOrderViewController: UIViewController {
     }
 
     @objc private func saveTapped() {
+        view.endEditing(true)
         let name = nameField.text ?? ""
         let size = DrinkSize.allCases[sizeSegment.selectedSegmentIndex]
         let sugar = SugarLevel.allCases[sugarSegment.selectedSegmentIndex]
@@ -185,5 +229,14 @@ final class EditOrderViewController: UIViewController {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "好", style: .cancel))
         present(alert, animated: true)
+    }
+}
+
+// MARK: - UITextFieldDelegate
+
+extension EditOrderViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }

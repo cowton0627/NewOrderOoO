@@ -39,7 +39,12 @@ class MenuDetailTableViewController: UITableViewController {
     private let heroStepper = UIStepper()
 
     // 對應 storyboard 上 7 個 static cells 的高度（row 0 用 hero card 取代,row 6 是 storyboard 預留的空白 cell,都設 0 隱藏）
-    private let staticHeights: [CGFloat] = [0, 77, 77, 66, 77, 77, 0]
+    // row 1 是姓名輸入,給多一點上下空間
+    private let staticHeights: [CGFloat] = [0, 92, 77, 66, 77, 77, 0]
+
+    /// 下單按鈕的 bottom constraint;鍵盤升起時往上推。
+    private var sendButtonBottomConstraint: NSLayoutConstraint?
+    private let sendButtonBaseBottom: CGFloat = -12
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,6 +56,43 @@ class MenuDetailTableViewController: UITableViewController {
         applyStyle()
         buildHeroHeader()
         refreshHero(stepperValue: 0)
+
+        // 點任何空白處收鍵盤,不影響 cell 點擊
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        tableView.addGestureRecognizer(tap)
+
+        // 鍵盤升起時把下單按鈕往上推,以免被擋住
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(keyboardWillChange(_:)),
+            name: UIResponder.keyboardWillChangeFrameNotification, object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(keyboardWillHide(_:)),
+            name: UIResponder.keyboardWillHideNotification, object: nil
+        )
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
+    @objc private func keyboardWillChange(_ note: Notification) {
+        guard let frame = (note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue,
+              let duration = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+        let overlap = max(0, view.bounds.height - frame.minY - view.safeAreaInsets.bottom)
+        sendButtonBottomConstraint?.constant = sendButtonBaseBottom - overlap
+        UIView.animate(withDuration: duration) { self.view.layoutIfNeeded() }
+    }
+
+    @objc private func keyboardWillHide(_ note: Notification) {
+        let duration = (note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double) ?? 0.25
+        sendButtonBottomConstraint?.constant = sendButtonBaseBottom
+        UIView.animate(withDuration: duration) { self.view.layoutIfNeeded() }
     }
 
     // MARK: - Hero card
@@ -221,6 +263,16 @@ class MenuDetailTableViewController: UITableViewController {
             string: "請輸入姓名",
             attributes: [.foregroundColor: AppTheme.tertiaryText]
         )
+        // 變高,呼吸感
+        orderNameTextField.translatesAutoresizingMaskIntoConstraints = false
+        if let existing = orderNameTextField.constraints.first(where: { $0.firstAttribute == .height && $0.secondItem == nil }) {
+            existing.constant = 48
+        } else {
+            orderNameTextField.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        }
+        // return 收鍵盤
+        orderNameTextField.returnKeyType = .done
+        orderNameTextField.delegate = self
 
         let segments: [UISegmentedControl?] = [orderSizeSegCon, orderSugarSegCon, orderIceSegCon, orderAddSegCon]
         for seg in segments {
@@ -252,12 +304,14 @@ class MenuDetailTableViewController: UITableViewController {
         button.titleLabel?.font = AppTheme.Font.buttonLabel
 
         view.addSubview(button)
+        let bottom = button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: sendButtonBaseBottom)
         NSLayoutConstraint.activate([
             button.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+            bottom,
             button.heightAnchor.constraint(equalToConstant: 56),
         ])
+        sendButtonBottomConstraint = bottom
 
         tableView.contentInset.bottom = 84
     }
@@ -314,6 +368,7 @@ class MenuDetailTableViewController: UITableViewController {
     }
 
     @IBAction func orderSended(_ sender: UIButton) {
+        view.endEditing(true)
         let name = orderNameTextField.text ?? ""
         let size = DrinkSize.allCases[orderSizeSegCon.selectedSegmentIndex]
         let sugar = SugarLevel.allCases[orderSugarSegCon.selectedSegmentIndex]
@@ -373,5 +428,14 @@ class MenuDetailTableViewController: UITableViewController {
         let alert = UIAlertController(title: "注意", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "好", style: .cancel))
         present(alert, animated: true)
+    }
+}
+
+// MARK: - UITextFieldDelegate
+
+extension MenuDetailTableViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
