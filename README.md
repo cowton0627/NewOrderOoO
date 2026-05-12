@@ -87,6 +87,18 @@ Firebase Firestore
 - `ReceiptViewController.swift`：下單成功摘要頁。
 - `EditOrderViewController.swift`：編輯既有訂單。
 
+## Design patterns
+
+- **MVVM + Repository**：VC 純 UI，VM 收業務邏輯，`OrderRepository` protocol 隔開 Firestore 細節。
+- **Strong-typed value objects**：`Money`（Decimal）、`OrderInput`，避免浮點誤差與參數混淆。
+- **Enum 取代 server 字串**：`DrinkSize` / `SugarLevel` / `IceLevel` / `AddOn`，compile-time 防拼字錯誤。
+- **Protocol-oriented DI**：`OrderRepository` 注入 ViewModel，測試換 `MockOrderRepository`。
+- **設計 token 集中**：`AppTheme`（色 / 字 / 圓角 / 陰影）。
+- **Reusable state view**：`StatusOverlayView` 統一載入 / 空 / 錯誤三種狀態。
+- **Per-user 資料隔離**：Firestore 文件帶 `uid` 欄位 + Security Rules 強制 owner-only。
+
+> 詳細選型理由與被放棄的方案見 [DECISIONS.md](DECISIONS.md)。
+
 ## Firestore 資料
 
 Collection：`orderList`
