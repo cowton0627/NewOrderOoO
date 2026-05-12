@@ -2,16 +2,13 @@
 //  AppDelegate.swift
 //  NewOrderOoO
 //
-//  Created by 鄭淳澧 on 2021/8/15.
-//
 
 import UIKit
 import FirebaseCore
 import FirebaseAuth
-import UserNotifications
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
@@ -30,27 +27,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             }
         }
 
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { agree, error in
-            if agree {
-                print("允許接收通知")
-            } else {
-                print("不允許接收通知")
-            }
-        }
-
-        UNUserNotificationCenter.current().delegate = self
-
         return true
     }
-    
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        
-        completionHandler([.badge, .sound, .alert])
-    }
-    
-    
-    
-    
 
     // MARK: UISceneSession Lifecycle
 

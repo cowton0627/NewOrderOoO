@@ -9,9 +9,7 @@ import UIKit
 
 final class EditOrderViewController: UIViewController {
 
-    var orderID: String!
-    var initialOrder: OrderData!
-    var repository: OrderRepository = FirestoreOrderRepository()
+    var viewModel: EditOrderViewModel!
     var onSaved: (() -> Void)?
 
     private let scrollView = UIScrollView()
@@ -35,12 +33,13 @@ final class EditOrderViewController: UIViewController {
     }
 
     private func prefill() {
-        drinkLabel.text = initialOrder.drinkName
-        nameField.text = initialOrder.orderName
-        sizeSegment.selectedSegmentIndex = DrinkSize.allCases.firstIndex { $0.rawValue == initialOrder.drinkSize } ?? 0
-        sugarSegment.selectedSegmentIndex = SugarLevel.allCases.firstIndex { $0.rawValue == initialOrder.sugar } ?? 0
-        iceSegment.selectedSegmentIndex = IceLevel.allCases.firstIndex { $0.rawValue == initialOrder.cold } ?? 0
-        addSegment.selectedSegmentIndex = AddOn.allCases.firstIndex { $0.rawValue == initialOrder.add } ?? 0
+        let order = viewModel.initialOrder
+        drinkLabel.text = order.drinkName
+        nameField.text = order.orderName
+        sizeSegment.selectedSegmentIndex = DrinkSize.allCases.firstIndex { $0.rawValue == order.drinkSize } ?? 0
+        sugarSegment.selectedSegmentIndex = SugarLevel.allCases.firstIndex { $0.rawValue == order.sugar } ?? 0
+        iceSegment.selectedSegmentIndex = IceLevel.allCases.firstIndex { $0.rawValue == order.cold } ?? 0
+        addSegment.selectedSegmentIndex = AddOn.allCases.firstIndex { $0.rawValue == order.add } ?? 0
     }
 
     private func setupUI() {
@@ -156,12 +155,7 @@ final class EditOrderViewController: UIViewController {
     }
 
     @objc private func saveTapped() {
-        let name = (nameField.text ?? "").trimmingCharacters(in: .whitespaces)
-        guard !name.isEmpty else {
-            presentInfoAlert(title: "注意", message: "訂購人不得為空")
-            return
-        }
-
+        let name = nameField.text ?? ""
         let size = DrinkSize.allCases[sizeSegment.selectedSegmentIndex]
         let sugar = SugarLevel.allCases[sugarSegment.selectedSegmentIndex]
         let ice = IceLevel.allCases[iceSegment.selectedSegmentIndex]
@@ -170,13 +164,14 @@ final class EditOrderViewController: UIViewController {
         Task { [weak self] in
             guard let self = self else { return }
             do {
-                try await self.repository.updateOrder(
-                    id: self.orderID,
-                    orderName: name, size: size, sugar: sugar, ice: ice, add: add
-                )
+                try await self.viewModel.save(name: name, size: size, sugar: sugar, ice: ice, add: add)
                 await MainActor.run {
                     self.onSaved?()
                     self.navigationController?.popViewController(animated: true)
+                }
+            } catch let validation as OrderError {
+                await MainActor.run {
+                    self.presentInfoAlert(title: "注意", message: validation.errorDescription ?? "")
                 }
             } catch {
                 await MainActor.run {

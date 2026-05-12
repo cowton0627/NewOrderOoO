@@ -2,8 +2,6 @@
 //  OrderDetailTableViewController.swift
 //  NewOrderOoO
 //
-//  Created by 鄭淳澧 on 2021/8/15.
-//
 
 import UIKit
 
@@ -250,8 +248,7 @@ class OrderDetailTableViewController: UITableViewController {
         let order = viewModel.order(at: indexPath.row)
         guard let id = order.id else { return }
         let edit = EditOrderViewController()
-        edit.orderID = id
-        edit.initialOrder = order
+        edit.viewModel = EditOrderViewModel(orderID: id, initialOrder: order)
         edit.onSaved = { [weak self] in self?.fetchData() }
         navigationController?.pushViewController(edit, animated: true)
     }

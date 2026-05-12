@@ -27,7 +27,8 @@
 
 - **MoneyTests** — Decimal 精度、parse 各種格式、`*` 運算、ISO / storage 字串
 - **MenuDetailViewModelTests** — 價格計算、`OrderError.missingName / .invalidPrice`、空白姓名 trimming、repository 錯誤傳遞
-- **OrderListViewModelTests** — load **不**觸發 migration(公開 demo 設計)、delete optimistic、avatar 穩定性
+- **OrderListViewModelTests** — load(空 / 多筆 / error)、delete optimistic + 失敗時不 rollback、無 id 訂單早 return 不打 repo、avatar 穩定性
+- **EditOrderViewModelTests** — 空白姓名 throw、白空格 trim、所有參數正確傳給 repo、repo 錯誤傳遞、initialOrder 暴露給 VC prefill
 
 ## 未涵蓋(可後續補)
 

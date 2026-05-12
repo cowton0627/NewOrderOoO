@@ -24,7 +24,7 @@
 - [x] 移除 `DEVELOPMENT_TEAM`,`CODE_SIGN_STYLE` 改 `Manual`,避免 Xcode 重新 inject 個人 Apple Team ID
 - [x] Git history rewrite:統一 author 為 `cowton0627 <83654992+cowton0627@users.noreply.github.com>`,工作信箱不留歷史
 - [x] 清掉同名專案的舊副本(Downloads ZIP / iCloud),避免 Xcode 開錯版本
-- [x] `migrateLegacyOrdersIfNeeded` 從預設流程移除(改 no-op + 測試反向驗證),避免公開 demo 接管別人 uid 的舊資料
+- [x] `migrateLegacyOrdersIfNeeded` 從 protocol 完全移除,避免公開 demo 接管別人 uid 的舊資料
 - [x] 移除 unused `FirebaseStorage` SPM 依賴
 
 ## Next(體驗)

@@ -37,7 +37,6 @@ final class OrderListViewModelTests: XCTestCase {
         repo.stubFetchOrders = []
         try await sut.load()
         XCTAssertEqual(sut.numberOfOrders, 0)
-        XCTAssertFalse(repo.migrateCalled, "public portfolio build should not run legacy ownership migration")
     }
 
     func testLoadWithOrders() async throws {
@@ -70,6 +69,40 @@ final class OrderListViewModelTests: XCTestCase {
         XCTAssertEqual(sut.numberOfOrders, 1)
         XCTAssertEqual(sut.order(at: 0).orderName, "B")
         XCTAssertEqual(repo.deleteOrderCalls, ["1"])
+    }
+
+    /// repository 失敗時:VM 的 orders 已經 optimistic 移除,error 會傳遞;
+    /// 目前 VM 不 rollback,呼叫端要自己 reload 或處理。
+    func testDeleteOptimisticPropagatesErrorAndKeepsOptimisticRemoval() async throws {
+        struct FakeError: Error {}
+        repo.stubFetchOrders = [makeOrder(id: "1", name: "A"), makeOrder(id: "2", name: "B")]
+        try await sut.load()
+        repo.stubDeleteOrderError = FakeError()
+        do {
+            try await sut.delete(at: 0)
+            XCTFail("expected throw")
+        } catch is FakeError {
+            // OK
+        } catch {
+            XCTFail("unexpected: \(error)")
+        }
+        // optimistic:即使 throw,VM 的 orders 已經少了一個
+        XCTAssertEqual(sut.numberOfOrders, 1)
+        XCTAssertEqual(repo.deleteOrderCalls, ["1"])
+    }
+
+    /// `OrderData.id` 是 optional;若該訂單沒 id 就早 return,不該呼叫 repository。
+    func testDeleteWithoutIdSkipsRepository() async throws {
+        let noID = OrderData(
+            id: nil, orderName: "X", drinkName: "Latte",
+            drinkSize: "Tall", sugar: "正常糖", cold: "正常冰", add: "珍珠",
+            price: "TWD 45", uid: "test-uid"
+        )
+        repo.stubFetchOrders = [noID]
+        try await sut.load()
+        try await sut.delete(at: 0)
+        XCTAssertEqual(sut.numberOfOrders, 0)
+        XCTAssertEqual(repo.deleteOrderCalls, [], "沒 id 不該打 repository")
     }
 
     // MARK: - avatar

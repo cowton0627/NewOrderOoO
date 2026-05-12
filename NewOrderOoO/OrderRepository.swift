@@ -16,8 +16,6 @@ protocol OrderRepository {
     func fetchOrders() async throws -> [OrderData]
     func deleteOrder(id: String) async throws
     func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn) async throws
-    /// 一次性把沒有 uid 欄位的舊訂單收編到當前 user。
-    func migrateLegacyOrdersIfNeeded() async throws
 }
 
 enum RepositoryError: LocalizedError {
@@ -111,9 +109,4 @@ final class FirestoreOrderRepository: OrderRepository {
         ])
     }
 
-    /// Demo-only:把所有 uid 不是當前 user 的訂單接管過來。
-    /// 場景:simulator 重新安裝後 anonymous uid 換了,舊資料卡在前一個 uid。
-    /// 保留方法只為了舊測試/協定相容;公開 portfolio 預設不再呼叫。
-    func migrateLegacyOrdersIfNeeded() async throws {
-    }
 }

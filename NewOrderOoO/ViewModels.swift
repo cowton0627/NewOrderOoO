@@ -96,3 +96,27 @@ final class OrderListViewModel {
         return String(format: "00%d", n)
     }
 }
+
+// MARK: - 編輯訂單
+
+final class EditOrderViewModel {
+    let orderID: String
+    let initialOrder: OrderData
+    private let repository: OrderRepository
+
+    init(orderID: String, initialOrder: OrderData, repository: OrderRepository = FirestoreOrderRepository()) {
+        self.orderID = orderID
+        self.initialOrder = initialOrder
+        self.repository = repository
+    }
+
+    /// 驗證 + 寫入。空 / 全空白 name throw `OrderError.missingName`;repository 錯誤原樣傳遞。
+    func save(name: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn) async throws {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { throw OrderError.missingName }
+        try await repository.updateOrder(
+            id: orderID, orderName: trimmed,
+            size: size, sugar: sugar, ice: ice, add: add
+        )
+    }
+}
