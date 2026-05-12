@@ -14,7 +14,7 @@
 - [x] 載入 / 空 / 錯誤狀態 UI(`StatusOverlayView`)
 - [x] 下單後 Receipt 確認頁
 - [x] 編輯訂單(規格 + 訂購人)
-- [x] App Icon (Three Pearls — 三顆 boba pearls 配蜂蜜金漸層)
+- [x] App Icon (Decanted Light — 俯瞰奶茶交融漩渦,單顆 pearl 為焦點,一筆奶白拉花)
 - [x] `.gitignore` (Xcode / Swift / SPM 標準)
 - [x] 單元測試:Mock + Money / 兩個 VM tests (Xcode test target 需手動加,詳 `NewOrderOoOTests/README.md`)
 

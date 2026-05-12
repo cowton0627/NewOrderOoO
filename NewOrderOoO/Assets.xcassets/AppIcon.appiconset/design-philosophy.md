@@ -1,39 +1,43 @@
-# Three Pearls
+# Decanted Light
 
-A movement of warmth held in arrested motion. Three identical forms,
-weightless and grave, suspended in a field of caramelized light. The
-discipline is reduction: every gesture earned, every form distilled to
-the smallest mark that still carries memory of its origin.
+A philosophy of slow merging. The artwork captures a single suspended
+second — the instant before two streams forget they were ever separate.
+Time is held in viscosity. Movement is implied through stillness. The
+work asks not what happens next, but how to dwell in what is already
+happening, with the patience of someone who has refused to let any
+millimeter pass unconsidered.
 
-The visual language is composed entirely of circles — perfect, ancient,
-unrepeatable. Their rhythm is musical: three beats, evenly spaced, that
-read as a single chord rather than a sequence. The eye accepts them
-as one object before it counts them as three. This is the work of
-painstaking calibration; spacing, proportion, and weight have been
-adjusted across countless quiet revisions until the composition feels
-not designed but discovered.
+The visual language is circular — the perfect ancient form, here
+flowing rather than held. A spiral that is not drawn but found: the
+natural geometry of a pour caught from above, where momentum and
+gravity negotiate a curve no draftsman would have invented. The
+asymmetry is essential. Symmetry would be design. This is observation
+— the painstaking attention of a master, recorded in a single frame.
 
-Color is the temperature of late afternoon honey poured over warm
-ceramic — a single golden field, sun-bleached at its center,
-deepening at its edges to amber and rust. Against this warmth the
-three forms are dark, weighty, almost edible: a roasted brown that
-remembers the bottom of a cup. Highlights are restrained,
-almost shy — small wet glints that suggest the soft interior of
-a thing rather than its surface.
+Color emerges from the temperature of late afternoon. On one side:
+honey poured over warm ceramic, the gold of a Taiwanese teahouse
+window catching the last hour of sun. On the other: a roasted oolong
+brown — patient, deep, with the memory of slow fire. Where the two
+meet, a hush of cream foam, tiny bubbles arranged like rests in a
+musical score. The palette refuses contrast; it offers conversation,
+calibrated across countless quiet revisions.
 
-The material vocabulary is matte, hand-thrown, slightly imperfect
-in a way only mastery permits. Edges are softened but never blurred.
-There is no decoration that does not also bear weight. Every
-millimeter is the product of expert craftsmanship, the kind that
-appears effortless precisely because it is the residue of relentless
-labor.
+A single anchor: one dark pearl, slightly off-center, placed by the
+geometry only mathematicians and weavers respect. The pearl is not
+a logo, not a mark — it is the still point in a turning composition,
+the centerpiece around which the liquid orbits. Light kisses it once,
+briefly, in the upper-left: a single small wet glint, restrained as a
+whispered word. Every detail load-bearing.
 
-Scale must be tested at every size. The composition holds at
-fingernail dimensions and at gallery wall dimensions; nothing is
-introduced that does not survive a 60-pixel reduction. This is
-art for the small surface — meticulous, patient, and quietly
-confident in its restraint.
+The material vocabulary is matte and hand-crafted. No vector slickness,
+no synthetic gloss. Edges are softened the way ink softens on
+absorbent paper. The surface holds a barely-perceptible grain — the
+texture of attention itself. What appears effortless is the residue
+of relentless craftsmanship; this is the labor that only reveals
+itself to the viewer who looks twice.
 
-Text, if it appears at all, is whispered: a single anchoring
-mark, integrated into the geometry, never explanatory. The
-field speaks. The forms answer. The viewer completes the chord.
+Scale must hold at every size. The composition reads at fingernail
+dimensions and at gallery wall. Nothing has been introduced that does
+not survive a 60-pixel reduction. The pearl is the focal anchor; the
+swirl is the music around it; the viewer completes the chord. Art
+disguised as a single fluid gesture — the residue of mastery.
