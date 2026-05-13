@@ -40,3 +40,6 @@ fastlane/test_output
 *.log
 *.bak
 *.tmp
+
+# Claude Code 專案說明檔(本地用,不入 repo)
+CLAUDE.md
