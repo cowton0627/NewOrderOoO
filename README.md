@@ -12,11 +12,25 @@ Repo 不包含真實 Firebase 設定檔。clone 後即使沒有 `GoogleService-I
 
 - 商品列表：顯示 12 款飲料、商品圖片、品名、描述與價格。
 - 商品詳細：選擇大小、糖量、冰塊、加料與數量，並即時計算總額。
-- 送出訂單：驗證訂購人姓名後寫入 Firestore，成功後顯示收據頁。
+- 送出訂單：驗證訂購人姓名後寫入 Firestore，成功後顯示收據頁並排程本地推播。
 - 訂單列表：讀取目前匿名使用者的訂單，支援空狀態、載入狀態與錯誤重試。
 - 訂單管理：左滑刪除訂單，點擊訂單可編輯訂購人與規格。
 - 使用者隔離：透過 Firebase Anonymous Auth 取得 uid，Firestore 規則限制只能讀寫自己的訂單。
 - UI 系統：集中管理色彩、字型、圓角、陰影與 reusable status overlay。
+
+## 畫面
+
+截圖來自 iPhone 17 Pro Max 模擬器。
+
+| 商品列表 | 商品詳細 / 選規格 | 送出訂單 |
+| :---: | :---: | :---: |
+| <img src="screenshots/01-menu.png" width="240" alt="商品列表"> | <img src="screenshots/02-detail.png" width="240" alt="商品詳細 / 選規格"> | <img src="screenshots/03-receipt.png" width="240" alt="送出訂單 / 收據確認"> |
+| 顯示 12 款飲料，含商品圖、品名與價格。 | 大小 / 糖量 / 冰塊 / 加料 / 數量，即時算總額。 | 訂單寫入 Firestore + 排程本地推播。 |
+
+| 訂單列表 | 取消（左滑刪除） | 編輯訂單 |
+| :---: | :---: | :---: |
+| <img src="screenshots/04-orderlist.png" width="240" alt="訂單列表"> | <img src="screenshots/05-swipe.png" width="240" alt="左滑刪除 / 取消"> | <img src="screenshots/06-edit.png" width="240" alt="編輯訂單"> |
+| 讀取目前 uid 的訂單，搭配 hero card。 | 左滑顯示「考慮 / 刪除」動作。 | 直接修改訂購人與規格後存回 Firestore。 |
 
 ## 技術棧
 
