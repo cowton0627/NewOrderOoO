@@ -261,19 +261,23 @@ class OrderDetailTableViewController: UITableViewController {
                 completionHandler(false)
                 return
             }
+            // 必須先 sync 從 VM 移除再 deleteRows;否則 UIKit 在驗證 row count 時 VM 還是舊長度,
+            // 會丟 NSInternalInconsistencyException「Invalid update: invalid number of rows...」
+            let id = self.viewModel.removeLocally(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
             completionHandler(true)
 
-            Task {
-                do {
-                    try await self.viewModel.delete(at: indexPath.row)
-                    await MainActor.run {
-                        if self.viewModel.numberOfOrders == 0 {
-                            self.statusOverlay.show(.empty(title: "還沒有訂單", message: "下訂後會出現在這裡"))
-                        }
+            if self.viewModel.numberOfOrders == 0 {
+                self.statusOverlay.show(.empty(title: "還沒有訂單", message: "下訂後會出現在這裡"))
+            }
+
+            if let id = id {
+                Task {
+                    do {
+                        try await self.viewModel.deleteRemote(id: id)
+                    } catch {
+                        print("deleteOrder failed: \(error)")
                     }
-                } catch {
-                    print("deleteOrder failed: \(error)")
                 }
             }
         }

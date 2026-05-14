@@ -106,6 +106,37 @@
 - **解**:target build settings 把 `CODE_SIGN_STYLE` 改成 `Manual`。Simulator build 不需要 Team(走 "Sign to Run Locally"),Manual 完全 OK;只有 build 到實機才需要,屆時臨時切回 Automatic + 選自己 team,build 完改回 Manual,別把 Team ID commit 進 git
 - **連帶**:Xcode UI 的 Signing & Capabilities 分頁可能顯示 "Signing for "NewOrderOoO" requires a development team" 警告;Simulator build 可以忽略
 
+## 左滑刪除訂單 crash:`Invalid update: invalid number of rows`
+
+- **症狀**:模擬器 + 實機都會 crash,trailing swipe → 點「刪除」瞬間 NSInternalInconsistencyException:`Invalid update: invalid number of rows in section 0. The number of rows contained in an existing section after the update must be equal to the number of rows contained in that section before the update, plus or minus the number of rows inserted or deleted (1 inserted, 1 deleted)...`
+- **根因**:UI 更新與資料源更新時序錯位的經典 race condition。原本寫:
+  ```swift
+  tableView.deleteRows(at: [indexPath], with: .fade)  // ① 同步
+  completionHandler(true)
+  Task {
+      try await viewModel.delete(at: indexPath.row)   // ② async,跨 run loop
+  }
+  ```
+  `tableView.deleteRows` 是 sync — UIKit 立刻呼叫 `numberOfRowsInSection` 驗證 data source 跟動畫一致。但 VM 內 `orders.remove` 雖然是 sync 一行,卻包在 `Task { await ... }` 裡,要等 Task scheduler 排到才執行 — 至少跨一個 run loop tick。驗證當下 VM 還是 N 筆、UIKit 期待 N-1 → assertion crash
+- **解**:把 VM 的 sync remove 跟 async network 拆開,VC 在同一 run loop 內先 sync 改資料源、再 `deleteRows`、再丟 Task 做網路:
+  ```swift
+  // ViewModels.swift
+  @discardableResult
+  func removeLocally(at index: Int) -> String? { orders.remove(at: index).id }
+  func deleteRemote(id: String) async throws { try await repository.deleteOrder(id: id) }
+  func delete(at index: Int) async throws {  // 維持原 API,給測試用
+      guard let id = removeLocally(at: index) else { return }
+      try await deleteRemote(id: id)
+  }
+
+  // OrderDetailTableViewController.swift
+  let id = self.viewModel.removeLocally(at: indexPath.row)  // sync,UI 跟 data source 同步
+  tableView.deleteRows(at: [indexPath], with: .fade)
+  completionHandler(true)
+  if let id = id { Task { try? await self.viewModel.deleteRemote(id: id) } }
+  ```
+- **預防**:任何 `tableView.deleteRows / insertRows / reloadRows` 之前,data source 必須已經更新到對應狀態,且要在同一 run loop 內。若用 async 更新 data source,記得 `await` 完才呼叫 UI batch update,或像本案拆成 sync data + async network 兩段
+
 ## Manual signing 設一半 → 「requires a provisioning profile」
 
 - **症狀**:Xcode 跳 `"NewOrderOoO" requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor.`,連 Simulator build 都跑不起來

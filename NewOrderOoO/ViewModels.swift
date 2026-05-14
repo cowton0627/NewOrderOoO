@@ -86,8 +86,18 @@ final class OrderListViewModel {
 
     /// 樂觀刪除:先從 orders 移除供 UI 立刻反映,再呼叫 repository。失敗時 throw,呼叫端可決定是否 rollback。
     func delete(at index: Int) async throws {
-        let removed = orders.remove(at: index)
-        guard let id = removed.id else { return }
+        guard let id = removeLocally(at: index) else { return }
+        try await deleteRemote(id: id)
+    }
+
+    /// 同步從 orders 移除,回傳被刪除訂單的 id(若無 id 為 nil)。
+    /// 呼叫端可在同一 run loop 內接著呼叫 `tableView.deleteRows`,避免資料源與 UI 不一致導致 NSInternalInconsistency crash。
+    @discardableResult
+    func removeLocally(at index: Int) -> String? {
+        orders.remove(at: index).id
+    }
+
+    func deleteRemote(id: String) async throws {
         try await repository.deleteOrder(id: id)
     }
 
