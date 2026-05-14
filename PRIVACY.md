@@ -37,6 +37,15 @@ NewOrderOoO 是一個個人作品集展示用的 iOS 飲料訂購 demo app。本
 
 App 在 `Info.plist` 中也未宣告任何隱私權限 (NSCameraUsageDescription 等),因為這些權限完全沒被使用。
 
+### 通知 (Local notifications)
+
+App 啟動時會請求 **通知授權** (`UNUserNotificationCenter.requestAuthorization`),用途是在下單成功 3 秒後顯示一則本地通知 (「訂購成功」)。
+
+- 這是 **本地** 通知,完全在裝置端排程,不經過任何 server 或第三方 push service
+- 通知內容僅為固定字串,**不包含**訂單內容、姓名、價格等個資
+- 拒絕授權不影響下單功能,只是不會看到通知
+- 隨時可在 iOS **設定 > 通知 > 沏光 (NewOrderOoO)** 關閉
+
 ---
 
 ## 3. 第三方服務

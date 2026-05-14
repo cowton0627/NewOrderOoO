@@ -69,6 +69,16 @@
 - UIView 包 UILabel 要兩層約束,不必要
 - UILabel 子類覆寫 `intrinsicContentSize` / `drawText(in:)` / `layoutSubviews` 算 capsule 圓角,單一元件
 
+## `OrderListViewModel` 拆 sync `removeLocally` + async `deleteRemote`
+
+- VM 對外有三個 method:`delete(at:) async throws`(原 API,給單元測試)、`removeLocally(at:) -> String?`(sync)、`deleteRemote(id:) async throws`(async)
+- 動機:UITableView 的 batch update(`deleteRows` / `insertRows` / `reloadRows`)是 sync — 一呼叫 UIKit 同 turn 內就驗證 `numberOfRowsInSection` 是否跟動畫一致;若 data source 改動包在 `Task { await ... }` 裡,就算 await 的第一行是 sync,也要跨 run loop tick 才執行 → 驗證當下資料源還是舊長度 → crash
+- 拆 sync / async 是設計選擇而不只 bug 修法:
+  - **sync API 處理 UI invariant**:呼叫端要在同一 run loop 內把資料源跟 UI 同步,沒得 await
+  - **async API 處理 I/O**:網路慢、可能失敗,跟 UI 解耦
+- `delete(at:)` 保留兩段組合的便利版,讓不需要立即 UI 更新的呼叫端(測試、後續批次刪除)可以一行寫完
+- 反例:很多 sample code 把 sync data 改動跟 async network 都包在同一 async func,VC 直接 `Task { await vm.delete(...); tableView.deleteRows(...) }` — 看起來乾淨,但同樣有 race;或更糟,先 `deleteRows` 再 `await` 出 inconsistency crash。詳 `bugs.md`「左滑刪除訂單 crash」
+
 ## 圖片用 `.scaleAspectFit` 不用 `.scaleAspectFill`
 
 - 商品列表用 fill(統一視覺,可接受裁切)

@@ -52,7 +52,7 @@ NewOrderOoO 透過 Swift Package Manager 引入 Firebase iOS SDK,以下是直接
 - Foundation
 - XCTest
 - ImageIO (用於 GIF 動畫)
-- UserNotifications (尚未實作,roadmap 項目)
+- UserNotifications (下單成功本地推播)
 
 ---
 

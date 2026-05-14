@@ -105,6 +105,23 @@ open NewOrderOoO.xcodeproj
 
 > 注意:如果錯誤是 `Missing package product 'FirebaseFirestoreSwift-Beta'` 之類已過期的 product,**先檢查 Xcode 開的是不是這份專案**,不是清快取問題。詳 `bugs.md`「Build 一直跳 Missing package product 清快取也沒用」。
 
+## 驗證本地推播
+
+下單成功會 3 秒後跳本地通知 banner。
+
+- 第一次跑會跳系統授權對話框,要點「允許」才會收到
+- 如果不小心拒絕、或要重測授權流程:
+  ```bash
+  # 完整 reset app 狀態(包含通知授權)
+  xcrun simctl uninstall "$DEVICE_ID" "$BUNDLE_ID"
+  # 重裝 + 重跑,授權對話框會重新出現
+  ```
+- 前景時 banner 會直接顯示在 app 上方(靠 `AppDelegate` 的 `UNUserNotificationCenterDelegate.willPresent` 回 `[.banner, .sound]`)
+- 背景 / 鎖屏會走系統通知中心
+- 觸發點:`MenuDetailTableViewController.scheduleSuccessNotification`(送單成功時呼叫)
+
+> 通知授權 API 不需要在 `Info.plist` 加 key — `UNUserNotificationCenter.requestAuthorization` 是系統 API,只有 alert / sound / badge 三個 option,跟 Camera / Mic 等 capability 不同。
+
 ## Firestore 看資料
 
 - Firebase Console > Firestore Database > Data tab

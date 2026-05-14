@@ -179,7 +179,7 @@ open NewOrderOoO.xcodeproj
 - 訂單狀態：待製作、製作中、完成、取消。
 - 商品搜尋與分類。
 - 產品資料動態化。
-- Push notification：訂單完成通知。
+- 遠端推播 (FCM)：訂單狀態變化時主動通知（目前只有送單成功本地推播）。
 - Crashlytics / Analytics。
 - CI/CD。
 - UI test 與 Firestore emulator 整合測試。
