@@ -120,13 +120,27 @@ final class EditOrderViewModel {
         self.repository = repository
     }
 
+    /// 初始杯數;舊文件沒 `quantity` 欄就 fallback 1
+    var initialQuantity: Int { max(1, initialOrder.quantity ?? 1) }
+
+    /// 單杯價格;優先用文件存的 `unitPrice`,其次從 `ProductCatalog` 反查 drinkName,最後 fallback 整單 price(等同 quantity=1)
+    var unitPrice: Money {
+        if let str = initialOrder.unitPrice, let m = Money.parse(str) { return m }
+        if let product = ProductCatalog.all.first(where: { $0.name == initialOrder.drinkName }),
+           let m = Money.parse(product.price) { return m }
+        return Money.parse(initialOrder.price) ?? .zero
+    }
+
     /// 驗證 + 寫入。空 / 全空白 name throw `OrderError.missingName`;repository 錯誤原樣傳遞。
-    func save(name: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn) async throws {
+    /// total price 由 repository 端用 `unitPrice * quantity` 重算,呼叫端不負責。
+    func save(name: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn, quantity: Int) async throws {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { throw OrderError.missingName }
+        let qty = max(1, quantity)
         try await repository.updateOrder(
             id: orderID, orderName: trimmed,
-            size: size, sugar: sugar, ice: ice, add: add
+            size: size, sugar: sugar, ice: ice, add: add,
+            quantity: qty, unitPrice: unitPrice
         )
     }
 }

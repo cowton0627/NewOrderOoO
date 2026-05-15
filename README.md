@@ -30,7 +30,7 @@ Repo 不包含真實 Firebase 設定檔。clone 後即使沒有 `GoogleService-I
 | 訂單列表 | 取消（左滑刪除） | 編輯訂單 |
 | :---: | :---: | :---: |
 | <img src="screenshots/04-orderlist.png" width="240" alt="訂單列表"> | <img src="screenshots/05-swipe.png" width="240" alt="左滑刪除 / 取消"> | <img src="screenshots/06-edit.png" width="240" alt="編輯訂單"> |
-| 讀取目前 uid 的訂單，搭配 hero card。 | 左滑顯示「考慮 / 刪除」動作。 | 直接修改訂購人與規格後存回 Firestore。 |
+| 讀取目前 uid 的訂單，搭配 hero card。 | 左滑顯示「考慮 / 刪除」動作。 | 修改訂購人 / 杯數 / 規格後存回 Firestore，總額用 unitPrice × quantity 重算。 |
 
 ## 技術棧
 
@@ -126,7 +126,9 @@ Collection：`orderList`
 | `sugar` | string | `正常糖` / `半糖` / `無糖` |
 | `cold` | string | `正常冰` / `少冰` / `去冰` |
 | `add` | string | `珍珠` / `愛玉` / `仙草` |
-| `price` | string | 訂單總額，例如 `TWD 90` |
+| `quantity` | number | 杯數（後加欄位，舊文件可能沒有，編輯時 fallback 為 1） |
+| `unitPrice` | string | 單杯價格，例如 `TWD 45`（後加欄位，舊文件可能沒有，編輯時從 `ProductCatalog` 反查） |
+| `price` | string | 訂單總額（= `unitPrice × quantity`），例如 `TWD 90` |
 
 ## Firebase 設定
 
@@ -169,7 +171,6 @@ open NewOrderOoO.xcodeproj
 ## 已知限制
 
 - 商品資料目前寫死在 `ProductCatalog`，尚未改成從 Firestore 載入。
-- 訂單目前只儲存總價，沒有保存 quantity 與 unit price。
 - Anonymous Auth 適合 demo；正式產品應支援 Apple / Google 登入與帳號資料轉移。
 - 舊資料 migration helper 已從預設載入流程移除，避免公開 demo 接管其他使用者資料。
 

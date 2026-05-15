@@ -13,7 +13,7 @@
 - [x] Firebase Anonymous Auth + Firestore Security Rules(per-user scoped)
 - [x] 載入 / 空 / 錯誤狀態 UI(`StatusOverlayView`)
 - [x] 下單後 Receipt 確認頁
-- [x] 編輯訂單(規格 + 訂購人)
+- [x] 編輯訂單(規格 + 訂購人 + 杯數;Firestore schema 加 `quantity` / `unitPrice`,total 由 unitPrice × quantity 重算)
 - [x] 下單成功本地推播(`UNUserNotificationCenter` + foreground banner)
 - [x] App Icon (Decanted Light — 俯瞰奶茶交融漩渦,單顆 pearl 為焦點,一筆奶白拉花)
 - [x] `.gitignore` (Xcode / Swift / SPM 標準)

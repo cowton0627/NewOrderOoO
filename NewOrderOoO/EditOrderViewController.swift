@@ -2,7 +2,7 @@
 //  EditOrderViewController.swift
 //  NewOrderOoO
 //
-//  編輯既有訂單(改規格 / 訂購人姓名),不改數量(quantity 並未存於 Firestore)。
+//  編輯既有訂單(規格 / 訂購人 / 杯數)。
 //
 
 import UIKit
@@ -17,6 +17,8 @@ final class EditOrderViewController: UIViewController {
 
     private let drinkLabel = UILabel()
     private let nameField = UITextField()
+    private let quantityValueLabel = UILabel()
+    private let quantityStepper = UIStepper()
     private let sizeSegment = UISegmentedControl(items: DrinkSize.allCases.map { $0.displayName })
     private let sugarSegment = UISegmentedControl(items: SugarLevel.allCases.map { $0.displayName })
     private let iceSegment = UISegmentedControl(items: IceLevel.allCases.map { $0.displayName })
@@ -30,6 +32,9 @@ final class EditOrderViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "編輯訂單"
+        // OrderDetailVC 開啟 prefersLargeTitles,push 過來會繼承 large title;
+        // 此頁用 UIScrollView 而非 UITableView,跟 large title 收合行為不合 → 強制 inline。
+        navigationItem.largeTitleDisplayMode = .never
         view.backgroundColor = AppTheme.pageBackground
 
         setupUI()
@@ -79,6 +84,17 @@ final class EditOrderViewController: UIViewController {
         sugarSegment.selectedSegmentIndex = SugarLevel.allCases.firstIndex { $0.rawValue == order.sugar } ?? 0
         iceSegment.selectedSegmentIndex = IceLevel.allCases.firstIndex { $0.rawValue == order.cold } ?? 0
         addSegment.selectedSegmentIndex = AddOn.allCases.firstIndex { $0.rawValue == order.add } ?? 0
+        // UIStepper.value 跟 quantity 是 1:1(從 1 開始);minimumValue = 1 才不會出現 0 杯
+        quantityStepper.value = Double(viewModel.initialQuantity)
+        refreshQuantityLabel()
+    }
+
+    @objc private func quantityStepperChanged() {
+        refreshQuantityLabel()
+    }
+
+    private func refreshQuantityLabel() {
+        quantityValueLabel.text = "\(Int(quantityStepper.value)) 杯"
     }
 
     private func setupUI() {
@@ -103,6 +119,18 @@ final class EditOrderViewController: UIViewController {
         drinkLabel.font = AppTheme.Font.detailTitle
         drinkLabel.textColor = AppTheme.primaryText
         drinkLabel.textAlignment = .center
+
+        quantityValueLabel.font = .monospacedDigitSystemFont(ofSize: 17, weight: .semibold)
+        quantityValueLabel.textColor = AppTheme.primaryText
+        quantityValueLabel.textAlignment = .right
+        quantityValueLabel.setContentHuggingPriority(.required, for: .horizontal)
+
+        quantityStepper.tintColor = AppTheme.accent
+        quantityStepper.minimumValue = 1
+        quantityStepper.maximumValue = 99
+        quantityStepper.stepValue = 1
+        quantityStepper.value = 1
+        quantityStepper.addTarget(self, action: #selector(quantityStepperChanged), for: .valueChanged)
 
         saveButton.setTitle("儲存變更", for: .normal)
         saveButton.titleLabel?.font = AppTheme.Font.buttonLabel
@@ -186,12 +214,21 @@ final class EditOrderViewController: UIViewController {
 
         let drinkCard = formCard([drinkLabel])
         let nameCard = formCard([sectionTitle("訂購人"), nameField])
+
+        // 數量 card:title 在左、value+stepper 在右,一行內排完
+        let qtyTitle = sectionTitle("數量")
+        let qtyRow = UIStackView(arrangedSubviews: [qtyTitle, UIView(), quantityValueLabel, quantityStepper])
+        qtyRow.axis = .horizontal
+        qtyRow.alignment = .center
+        qtyRow.spacing = 8
+        let quantityCard = formCard([qtyRow])
+
         let sizeCard = formCard([sectionTitle("大小"), sizeSegment])
         let sugarCard = formCard([sectionTitle("糖量"), sugarSegment])
         let iceCard = formCard([sectionTitle("冰塊"), iceSegment])
         let addCard = formCard([sectionTitle("加料"), addSegment])
 
-        let stack = UIStackView(arrangedSubviews: [drinkCard, nameCard, sizeCard, sugarCard, iceCard, addCard])
+        let stack = UIStackView(arrangedSubviews: [drinkCard, nameCard, quantityCard, sizeCard, sugarCard, iceCard, addCard])
         stack.axis = .vertical
         stack.spacing = 12
         return stack
@@ -204,11 +241,12 @@ final class EditOrderViewController: UIViewController {
         let sugar = SugarLevel.allCases[sugarSegment.selectedSegmentIndex]
         let ice = IceLevel.allCases[iceSegment.selectedSegmentIndex]
         let add = AddOn.allCases[addSegment.selectedSegmentIndex]
+        let quantity = Int(quantityStepper.value)
 
         Task { [weak self] in
             guard let self = self else { return }
             do {
-                try await self.viewModel.save(name: name, size: size, sugar: sugar, ice: ice, add: add)
+                try await self.viewModel.save(name: name, size: size, sugar: sugar, ice: ice, add: add, quantity: quantity)
                 await MainActor.run {
                     self.onSaved?()
                     self.navigationController?.popViewController(animated: true)

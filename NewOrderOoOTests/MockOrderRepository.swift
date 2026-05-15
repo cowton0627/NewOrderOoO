@@ -18,7 +18,7 @@ final class MockOrderRepository: OrderRepository {
     // 觀察:測試後可看呼叫紀錄
     private(set) var placeOrderCalls: [OrderInput] = []
     private(set) var deleteOrderCalls: [String] = []
-    private(set) var updateOrderCalls: [(id: String, name: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn)] = []
+    private(set) var updateOrderCalls: [(id: String, name: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn, quantity: Int, unitPrice: Money)] = []
 
     func placeOrder(_ input: OrderInput) async throws -> String {
         placeOrderCalls.append(input)
@@ -36,8 +36,8 @@ final class MockOrderRepository: OrderRepository {
         if let error = stubDeleteOrderError { throw error }
     }
 
-    func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn) async throws {
-        updateOrderCalls.append((id, orderName, size, sugar, ice, add))
+    func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn, quantity: Int, unitPrice: Money) async throws {
+        updateOrderCalls.append((id, orderName, size, sugar, ice, add, quantity, unitPrice))
         if let error = stubUpdateOrderError { throw error }
     }
 }

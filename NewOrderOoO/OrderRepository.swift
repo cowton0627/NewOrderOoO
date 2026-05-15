@@ -15,7 +15,7 @@ protocol OrderRepository {
     func placeOrder(_ input: OrderInput) async throws -> String
     func fetchOrders() async throws -> [OrderData]
     func deleteOrder(id: String) async throws
-    func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn) async throws
+    func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn, quantity: Int, unitPrice: Money) async throws
 }
 
 enum RepositoryError: LocalizedError {
@@ -76,6 +76,8 @@ final class FirestoreOrderRepository: OrderRepository {
             "cold": input.ice.rawValue,
             "add": input.add.rawValue,
             "price": input.totalPrice.formattedISO(),
+            "quantity": input.quantity,
+            "unitPrice": input.unitPrice.formattedISO(),
             "uid": uid,
         ]
         let ref = try await db.collection(collectionName).addDocument(data: data)
@@ -97,15 +99,19 @@ final class FirestoreOrderRepository: OrderRepository {
         try await db.collection(collectionName).document(id).delete()
     }
 
-    func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn) async throws {
+    func updateOrder(id: String, orderName: String, size: DrinkSize, sugar: SugarLevel, ice: IceLevel, add: AddOn, quantity: Int, unitPrice: Money) async throws {
         _ = try await currentUid()
         let db = try firestore()
+        let total = unitPrice * quantity
         try await db.collection(collectionName).document(id).updateData([
             "orderName": orderName,
             "drinkSize": size.rawValue,
             "sugar": sugar.rawValue,
             "cold": ice.rawValue,
             "add": add.rawValue,
+            "quantity": quantity,
+            "unitPrice": unitPrice.formattedISO(),
+            "price": total.formattedISO(),
         ])
     }
 

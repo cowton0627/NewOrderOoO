@@ -69,6 +69,16 @@
 - UIView 包 UILabel 要兩層約束,不必要
 - UILabel 子類覆寫 `intrinsicContentSize` / `drawText(in:)` / `layoutSubviews` 算 capsule 圓角,單一元件
 
+## 編輯訂單支援改杯數 → Firestore schema 加 `quantity` + `unitPrice`
+
+- 早期 schema 只存 `price` 字串(`"TWD 90"`),沒留 quantity / unit price → 編輯時無法重算 total,所以 EditOrderVC 刻意省略數量欄位
+- 修法選項:
+  - **A**:擴充 schema,加 `quantity: Int?` + `unitPrice: String?` 兩個 optional 欄;`placeOrder` 寫入,`updateOrder` 重算 total
+  - **B**:不動 schema,編輯時從 `ProductCatalog` 反查 unit price(用 `drinkName` 當 key)
+- 選 A,理由:結構乾淨、編輯時不依賴靜態 catalog、未來 catalog 漲價也不會回頭算錯歷史單
+- 兩欄設成 `optional` 而非 required,讓舊文件(沒這兩欄)還能正常解出 `OrderData`;EditVM 內 fallback 三段:document `unitPrice` → catalog 反查 → 整單 `price`(假設 quantity=1)
+- `quantity` 用 number 存(不像其他欄位都字串):跟「Firestore 資料仍存字串」那條的取捨不同 — quantity 是純計數,沒有單位或顯示格式議題,直接存 Int 更省心,parse 也少一層
+
 ## `OrderListViewModel` 拆 sync `removeLocally` + async `deleteRemote`
 
 - VM 對外有三個 method:`delete(at:) async throws`(原 API,給單元測試)、`removeLocally(at:) -> String?`(sync)、`deleteRemote(id:) async throws`(async)
