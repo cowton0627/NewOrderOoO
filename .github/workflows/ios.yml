@@ -1,0 +1,51 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Build & Test
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          sw_vers
+          xcodebuild -version
+          xcrun simctl list devices available | grep -E "iPhone (15|16)" | head -5
+
+      - name: Resolve SPM
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project NewOrderOoO.xcodeproj \
+            -scheme NewOrderOoO
+
+      - name: Build & test
+        env:
+          NSUnbufferedIO: "YES"
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project NewOrderOoO.xcodeproj \
+            -scheme NewOrderOoO \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
+            -resultBundlePath build/TestResults.xcresult \
+            CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO
+
+      - name: Upload test result bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: build/TestResults.xcresult
+          retention-days: 14

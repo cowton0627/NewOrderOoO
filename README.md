@@ -1,5 +1,7 @@
 # NewOrderOoO
 
+[![iOS CI](https://github.com/cowton0627/NewOrderOoO/actions/workflows/ios.yml/badge.svg?branch=main)](https://github.com/cowton0627/NewOrderOoO/actions/workflows/ios.yml)
+
 NewOrderOoO（home screen 顯示名稱：**沏光**）是一個 iOS 飲料訂購 demo app，使用 Swift / UIKit 實作，搭配 Firebase Anonymous Auth 與 Cloud Firestore 儲存訂單資料。專案重點是把早期 storyboard 型 app 整理成較清楚的 MVVM + Repository 架構，並補上卡片式 UI、訂單確認頁、編輯訂單與基礎單元測試。
 
 ## Portfolio Notice
