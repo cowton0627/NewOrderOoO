@@ -162,6 +162,45 @@ open NewOrderOoO.xcodeproj
 
 詳 `bugs.md`「Xcode 自動把 DEVELOPMENT_TEAM 加回 pbxproj」。
 
+## CI(GitHub Actions)操作
+
+Workflow:`.github/workflows/ios.yml`(macos-15 runner / Xcode 16.x)。push / PR 到 `main` 自動跑 `xcodebuild test`,也可手動 `workflow_dispatch`。
+
+```bash
+# 看最近 runs
+gh run list --workflow=ios.yml --limit 5
+
+# 看單一 run 摘要
+gh run view <run-id>
+
+# 紅了只看失敗 step log(最常用)
+gh run view <run-id> --log-failed
+
+# 手動觸發一次(不用真 push)
+gh workflow run ios.yml
+
+# 等某 run 跑完(blocking)
+gh run watch <run-id> --exit-status
+```
+
+或網頁:https://github.com/cowton0627/NewOrderOoO/actions
+
+### CI 失敗時的常見原因
+
+- **iOS deployment target 失配**:test target / 主 target 的 `IPHONEOS_DEPLOYMENT_TARGET` 比 runner 預裝的最新 iOS sim 高。詳 `bugs.md`「CI 紅:test target 的 iOS deployment target 比 runner sim 高」
+- **runner image 無 destination 指定的 sim**:`xcrun simctl list devices available` 在 runner 跑出來才知道實際有什麼;workflow 用 `OS=latest` 不綁特定版本
+
+### 下載 .xcresult 看細節
+
+CI 上傳 test 結果為 artifact:
+
+```bash
+gh run download <run-id> -n test-results -D /tmp/ci-result
+open /tmp/ci-result/TestResults.xcresult   # 用 Xcode 開
+```
+
+裡面有完整 build settings + test stack trace,比只看 log 直觀。
+
 ## 常用 git 動作
 
 - 看哪些 commits 還沒 push:`git log origin/main..HEAD --oneline`

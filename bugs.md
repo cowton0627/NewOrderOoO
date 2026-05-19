@@ -137,6 +137,23 @@
   ```
 - **預防**:任何 `tableView.deleteRows / insertRows / reloadRows` 之前,data source 必須已經更新到對應狀態,且要在同一 run loop 內。若用 async 更新 data source,記得 `await` 完才呼叫 UI batch update,或像本案拆成 sync data + async network 兩段
 
+## CI 紅:test target 的 iOS deployment target 比 runner sim 高
+
+- **症狀**:本機 build / test 都過,push 到 GitHub Actions 後 `xcodebuild test` 直接拒絕,exit 70:
+  ```
+  Cannot test target "NewOrderOoOTests" on "iPhone 16":
+  iPhone 16's iOS Simulator 26.2 doesn't match
+  NewOrderOoOTests's iOS Simulator 26.4 deployment target.
+  ```
+- **根因**:在 Xcode 26 新建 test target / 升 Xcode 26 後 Xcode 會把 test target 的 `IPHONEOS_DEPLOYMENT_TARGET` 預設帶成「當前最新 iOS」(26.4),跟主 target(刻意鎖 14.5)失配。本機 Xcode 自帶 26.4 sim 不會撞;但 GitHub-hosted `macos-15` runner 預裝的最新 iOS sim 只到 26.2(image 釋出時可用版),低於 test target,xcodebuild 直接拒絕 build
+- **解**:把 test target 兩個 build config(Debug / Release)的 `IPHONEOS_DEPLOYMENT_TARGET` 從 26.4 降到 14.5,跟主 target 對齊。XCTest 自身在 14.5+ 都正常,沒副作用
+  ```
+  # pbxproj 兩處
+  IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+  ```
+- **預防**:升 Xcode 或在 Xcode UI 新建 test target 後,先 `grep IPHONEOS_DEPLOYMENT_TARGET project.pbxproj` 確認 4 處(主 target Debug/Release + test target Debug/Release)都對齊
+- **debug 線索**:CI artifact 會上傳 `.xcresult`(`gh run download <run-id>`),本機開能看到完整 build settings + 錯誤;比只看 log 直觀
+
 ## Manual signing 設一半 → 「requires a provisioning profile」
 
 - **症狀**:Xcode 跳 `"NewOrderOoO" requires a provisioning profile. Select a provisioning profile in the Signing & Capabilities editor.`,連 Simulator build 都跑不起來
